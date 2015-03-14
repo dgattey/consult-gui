@@ -4,16 +4,12 @@
  */
 
  #footer-component {
- 	padding-top: 30px;
- 	background: $color_bg_dark;
- 	color: $color_text;
-
  	#copyright {
  		text-transform: uppercase;
- 		letter-spacing: 2.5px;
- 		font-size: 0.8em;
- 		padding: 10px 0;
+ 		letter-spacing: 2px;
+ 		font-size: 0.85em;
+ 		padding: 10px 0 5px 0;
  		background: $color_accent;
- 		color: $color_text_light;
+ 		color: $color_text_mute;
  	}
  }

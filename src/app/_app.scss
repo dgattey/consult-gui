@@ -8,9 +8,14 @@ $header_size : 50px;
 
 @import 'views/views';
 
-body, html {
+body {
 	color: $color_text;
 	background-color: $color_bg;
+}
+
+html {
+	color: $color_text;
+	background-color: $color_accent;
 }
 
 .text-muted {

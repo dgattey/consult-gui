@@ -4,8 +4,8 @@ angular.module('app.views.header', [])
 
   	$scope.navigation = [
   		{ state:'home', title: 'Home' },
-  		{ state:'about', title: 'About' },
-  		{ state:'portfolio', title: 'Portfolio' },
-  		{ state:'contact', title: 'Contact' }
+  		{ state:'hours', title: 'Schedule' },
+  		{ state:'sub', title: 'Sub' },
+  		{ state:'contact', title: 'People' }
   	];
   });
