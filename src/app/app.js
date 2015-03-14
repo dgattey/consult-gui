@@ -15,6 +15,9 @@ angular.module('App', [
 
     // Set up ui-router states using the stateHelpProvider library
     shpc('home', '');
+    shpc('schedule', 'schedule');
+    shpc('sub', 'sub');
+    shpc('contact', 'people');
 
     // Configure other router providers
     $urlRouterProvider.otherwise('/');
