@@ -1,0 +1,26 @@
+/**
+ * FEED
+ * This file contains styles specific to the feed template of the app
+ */
+
+ $carousel_height: 300px;
+
+ div.home-page {
+ 	margin-top: $header_size;
+ 	padding-top: 30px;
+ 	height: 1000px;
+ 	.carousel {
+ 		&.placeholder {
+ 			// Fake it
+ 			z-index: 10;
+ 			margin: 0 0 40px 0;
+ 			border-radius: 10px;
+ 			overflow: hidden;
+ 			max-width: 100%;
+			width: 100%;
+			height: $carousel_height;
+	 		background: $color_bg_dark;
+	 	}
+ 	}
+}
+

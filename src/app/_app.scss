@@ -1,0 +1,23 @@
+/**
+ * APP
+ * This file contains the styles and partial files that run the app
+ * itself. Should only be used for global styles across templates
+ */
+
+$header_size : 50px;
+
+@import 'views/views';
+
+body, html {
+	color: $color_text;
+	background-color: $color_bg;
+}
+
+.text-muted {
+	color: $color_text_mute;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: $color_accent;
+}
+

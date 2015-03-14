@@ -1,0 +1,34 @@
+/**
+ * HEADER
+ * This file contains styles specific to the header template of the app
+ */
+
+nav .header.navbar-inverse {
+	height: $header_size;
+	background-color: $color_accent;
+	color: $color_text_light;
+	border: none;
+
+	.navbar-form, .navbar-collapse {
+		border-color: $color_accent;
+	}
+
+	.navbar-nav > li.active > a {
+		background-color: darken($color_accent, 20%);
+	}
+	.navbar-nav > li > a, &.navbar > .container .navbar-brand {
+		color: $color_text_light;
+		font-weight: 500;
+
+		&:hover {
+			color: $color_hover;
+		}
+	}
+
+	&.navbar > .container .navbar-brand {
+		text-transform: uppercase;
+		letter-spacing: 3px;
+		font-weight: 400;
+		font-size: 1.5em;
+	}
+}
