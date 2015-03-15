@@ -27,7 +27,7 @@ nav .header.navbar-inverse {
 	}
 
 	&.navbar > .container .navbar-brand {
+		@extend .title-case;
 		font-size: 1.7em;
-		font-family: $fontstack_header;
 	}
 }

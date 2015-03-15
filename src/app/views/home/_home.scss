@@ -1,23 +1,34 @@
 /**
- * FEED
- * This file contains styles specific to the feed template of the app
+ * HOME
+ * This file contains styles specific to the home template of the app
  */
 
- $carousel_height: 300px;
-
- div.home-page {
+div.home-page {
  	margin-top: $header_size;
  	padding: 30px 0;
 
  	.home-item {
- 		a {
- 			color: inherit;
- 			transition: color 0.2s ease;
- 			&:hover {
- 				text-decoration: none;
- 				color: $color_accent;
- 			}
+ 		&:nth-child(3n) .page-heading-title {
+ 			background-position: 300px -300px;
  		}
+ 		&:nth-child(2n) .page-heading-title {
+ 			background-position: 100px -200px;
+ 		}
+ 		&:hover {
+ 			opacity: 0.85;
+ 		}
+ 		a {
+ 			padding: 25px 60px;
+ 		}
+ 		h3 {
+ 			letter-spacing: 1px;
+ 			color: $color_text_mute;
+ 			font-size: 1.4em;
+ 		}
+ 	}
+
+ 	.welcome {
+ 		margin-bottom: 30px;
  	}
 }
 

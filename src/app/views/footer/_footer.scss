@@ -6,9 +6,10 @@
  #footer-component {
  	#copyright {
  		text-transform: uppercase;
- 		letter-spacing: 2px;
+ 		letter-spacing: 3px;
  		font-size: 0.85em;
- 		padding: 10px 0 5px 0;
+ 		font-weight: 500;
+ 		padding: 20px 0 15px 0;
  		background: $color_accent;
  		color: $color_text_mute;
  	}

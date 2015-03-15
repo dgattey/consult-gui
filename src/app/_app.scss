@@ -26,18 +26,25 @@ h1, h2, h3, h4, h5, h6 {
 	color: $color_accent;
 }
 
-h1.page-heading-title {
+h1 {
+	@extend .title-case;
+}
+
+.title-case {
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 5px;
+}
+
+.page-heading-title {
 	background: url(http://cs.brown.edu/img/bg.png) no-repeat center center;
 	background-size: cover;
 	padding: 40px 60px;
 	background-color: $color_accent;
-	color: $color_text_light;
-	font-size: 3.8em;
-	line-height: 1em;
 	margin-bottom: 20px;
-	text-transform: uppercase;
-	letter-spacing: 5px;
-	font-family: $fontstack_body;
-	font-weight: 600;
+	display: block;
+	h1, h2, h3, h4, h5, h6, & {
+		color: $color_text_light;
+	}
 }
 

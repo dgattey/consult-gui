@@ -3,10 +3,10 @@ angular.module('app.views.home', [])
     // Set title of page
     $rootScope.pageTitle = "Home";
 
-    $scope.options = [
-    	{title: 'Schedule', text: 'Check your assigned shifts'},
-    	{title: 'Sub', text: 'Sub out shifts or take other\'s subbed shifts'},
-    	{title: 'People', text: 'See contact information for all consultants'}
+    $scope.links = [
+	    {title: 'Schedule', subtitle:'Check your shifts for this week and beyond'}, 
+	    {title: 'Sub', subtitle:'Take other people\'s shifts or put your own up for grabs'}, 
+	    {title: 'People', subtitle:'Find out who to call if you\'ll be late or are waiting for someone'}
     ];
 
   });
