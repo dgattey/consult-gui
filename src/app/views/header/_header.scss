@@ -6,11 +6,9 @@
 nav .header.navbar-inverse {
 	height: $header_size;
 	color: $color_text_light;
+	background-color: $color_accent;
 	&, .navbar-collapse, .navbar-form {
 		border-color: lighten($color_accent, 5%);
-	}
-	&, .navbar-collapse {
-		background-color: $color_accent;
 	}
 	.navbar-nav > li.active > a {
 		background-color: darken($color_accent, 10%);
@@ -26,5 +24,11 @@ nav .header.navbar-inverse {
 	&.navbar > .container .navbar-brand {
 		@extend .title-case;
 		font-size: 1.7em;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	nav .header.navbar-inverse .navbar-collapse {
+		background-color: $color_accent;
 	}
 }
