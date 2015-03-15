@@ -9,16 +9,25 @@ div.home-page {
 
  	.home-item {
  		&:nth-child(3n) .page-heading-title {
+			background-blend-mode: lighten;
+			background-repeat: repeat-x;
  			background-position: 300px -300px;
+			background-color: hsl(323, 48%, 36%);
  		}
  		&:nth-child(2n) .page-heading-title {
+			background-blend-mode: exclusion;
+			background-repeat: repeat-x;
  			background-position: 100px -200px;
+			background-color: hsl(179, 100%, 67%);
  		}
  		&:hover {
  			opacity: 0.85;
  		}
  		a {
  			padding: 25px 60px;
+			&:hover {
+				text-decoration: none;
+			}
  		}
  		h3 {
  			letter-spacing: 1px;
@@ -32,3 +41,9 @@ div.home-page {
  	}
 }
 
+@media screen and (max-width: 767px) {
+	div.home-page {
+		margin-top: $header_size;
+		padding: 0 0 30px 0;
+	}
+}

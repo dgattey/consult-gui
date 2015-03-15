@@ -5,22 +5,19 @@
 
 nav .header.navbar-inverse {
 	height: $header_size;
-	background-color: $color_accent;
 	color: $color_text_light;
-	border: none;
-
-	.navbar-form, .navbar-collapse {
-		border-color: $color_accent;
+	&, .navbar-collapse, .navbar-form {
+		border-color: lighten($color_accent, 5%);
 	}
-
+	&, .navbar-collapse {
+		background-color: $color_accent;
+	}
 	.navbar-nav > li.active > a {
-		background-color: darken($color_accent, 20%);
+		background-color: darken($color_accent, 10%);
 	}
 	.navbar-nav > li > a, &.navbar > .container .navbar-brand {
 		color: $color_text_light;
 		font-weight: 400;
-
-
 		&:hover {
 			color: $color_hover;
 		}
