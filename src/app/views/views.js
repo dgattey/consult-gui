@@ -3,5 +3,6 @@ angular.module('app.views', [
 	'app.views.header',
 	'app.views.footer',
 
-	'app.views.home'
+	'app.views.home',
+	'app.views.people'
 ]);
