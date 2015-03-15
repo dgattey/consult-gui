@@ -4,5 +4,7 @@ angular.module('app.views', [
 	'app.views.footer',
 
 	'app.views.home',
-	'app.views.people'
+	'app.views.people',
+	'app.views.schedule',
+	'app.views.sub'
 ]);
