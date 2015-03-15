@@ -17,7 +17,7 @@ angular.module('App', [
     shpc('home', '');
     shpc('schedule', 'schedule');
     shpc('sub', 'sub');
-    shpc('contact', 'people');
+    shpc('people', 'contact');
 
     // Configure other router providers
     $urlRouterProvider.otherwise('/');

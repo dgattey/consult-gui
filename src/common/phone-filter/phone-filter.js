@@ -3,7 +3,7 @@ angular.module('phoneFilter', [])
     return function (tel) {
         if (!tel) return '';
 
-        var value = tel.toString().trim().replace(/^\+/, '');
+        var value = tel.toString().trim().replace(/-/g, '');
 
         if (value.match(/[^0-9]/)) {
             return tel;

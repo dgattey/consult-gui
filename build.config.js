@@ -23,10 +23,10 @@ module.exports = {
    */
   appFiles: {
     js: [ 'src/**/*.js', '!src/**/*.spec.js', '!src/assets/**/*.js' ],
-    assets: ['src/assets/**/*.*'],
+    assets: [ 'src/assets/**/*.*', 'src/assets/**/*' ],
     tpl: [ 'src/app/**/*.tpl.html', 'src/common/**/*.tpl.html' ],
     rootHtml: 'src/index.html',
-    sass: ['src/**/*.scss'],
+    sass: [ 'src/**/*.scss' ],
     rootSass: 'src/main.scss'
   },
 

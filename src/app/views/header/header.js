@@ -6,6 +6,6 @@ angular.module('app.views.header', [])
   		{ state:'home', title: 'Home' },
   		{ state:'schedule', title: 'Schedule' },
   		{ state:'sub', title: 'Sub' },
-  		{ state:'contact', title: 'People' }
+  		{ state:'people', title: 'People' }
   	];
   });
