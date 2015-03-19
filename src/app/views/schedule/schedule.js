@@ -107,8 +107,11 @@ angular.module('app.views.schedule', ['stringExtensions'])
 			for (var slot in shifts) {
 				var val = shifts[slot];
 				var dayName = val.substring(0, val.indexOf(' '));
+				var startTime = val.substring(StringExtensions.nthOccurrence(val, ' ', 1)+1, val.indexOf('-'));
+				var endTime = val.substring(val.indexOf('-')+1);
+
 				var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
-				daySlots[slot] = val.substring(val.indexOf(' ')).trim();
+				daySlots[slot] = {start: startTime, end: endTime};
 				tmpDays[dayName] = {title:dayName, slots:daySlots};
 			}
 
@@ -123,6 +126,22 @@ angular.module('app.views.schedule', ['stringExtensions'])
 				tmpDays.Sun
 			];
 		}
+
+		// Calculates top positioning of a time block given the time
+		$scope.timeBlockStyle = function(time) {
+			var splitStart = time.start.split(':');
+			var splitEnd = time.end.split(':');
+			var start = parseInt(splitStart[0])+(parseInt(splitStart[1])/60.0);
+			var end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
+			
+			var height = (end - start) * 70;
+			var topOffset = (start-9)*70;
+			return {
+				height: ''+height+'px', 
+				position: 'absolute', 
+				'margin-top': ''+topOffset+'px'
+			};
+		};
 			
 
 		/* Do all the things! 
