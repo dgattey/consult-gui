@@ -105,6 +105,11 @@ angular.module('app.views.schedule', ['stringExtensions'])
 
 			// Associates shift times with days
 			for (var slot in shifts) {
+				// Only include r and s slots if we're in reading period
+				if (slot.indexOf('r') > -1 || slot.indexOf('s') > -1) {
+					if (current.week < meta.weeksToReading) continue;
+				}
+
 				var val = shifts[slot];
 				var dayName = val.substring(0, val.indexOf(' '));
 				var startTime = val.substring(StringExtensions.nthOccurrence(val, ' ', 1)+1, val.indexOf('-'));
@@ -125,6 +130,14 @@ angular.module('app.views.schedule', ['stringExtensions'])
 				tmpDays.Sat,
 				tmpDays.Sun
 			];
+
+			// The default times on the left
+			$scope.legend = [];
+			var hour;
+			var lastHour = current.week < meta.weeksToReading ? 26 : 28;
+			for (hour = 9; hour<lastHour; hour++) {
+				$scope.legend.push({start: hour+':00', end: (hour+1)+':00'});
+			}
 		}
 
 		// Calculates top positioning of a time block given the time
@@ -134,11 +147,10 @@ angular.module('app.views.schedule', ['stringExtensions'])
 			var start = parseInt(splitStart[0])+(parseInt(splitStart[1])/60.0);
 			var end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
 			
-			var height = (end - start) * 70;
-			var topOffset = (start-9)*70;
+			var height = (end - start) * 45 - 5;
+			var topOffset = (start-9) * 45;
 			return {
-				height: ''+height+'px', 
-				position: 'absolute', 
+				'height': ''+height+'px', 
 				'margin-top': ''+topOffset+'px'
 			};
 		};

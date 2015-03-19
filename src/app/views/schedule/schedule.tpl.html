@@ -1,19 +1,29 @@
 <div class="schedule container" ng-controller="ScheduleCtrl">
-	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>
-	
+	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>	
 	<div class="col-xs-12 calendar">
 		<div class="row">
 			<!-- Legend on left -->
 			<div class="col-xs-1 legend">
+				<div class="legend-blocks">
+					<div class="legend-block" 
+						ng-repeat="hour in legend" 
+						ng-style="timeBlockStyle(hour)">
+						<h5>{{hour.start}}</h5>
+					</div>
+				</div>
 			</div>
 
 			<!-- Days -->
 			<div class="col-xs-11 days">
 				<div ng-repeat="day in days" class="day" id="{{day.title}}">
 					<h4>{{day.title}}</h4>
-					<div class="time-block" ng-repeat="(slot,time) in day.slots">
-						<h5>{{slots[slot]}}</h5>
-						<h6>{{time.start}} - {{time.end}}</h6>
+					<div class="time-blocks">
+						<div class="time-block" 
+							ng-repeat="(slot,time) in day.slots" 
+							ng-style="timeBlockStyle(time)"
+							ng-hide="slots[slot] == 'CLOSED'">
+							<h5>{{slots[slot]}}</h5>
+						</div>
 					</div>
 				</div>
 			</div>
