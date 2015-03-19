@@ -1,3 +1,25 @@
 <div class="schedule container" ng-controller="ScheduleCtrl">
 	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>
+	
+	<div class="col-xs-12 calendar">
+		<div class="row">
+			<!-- Legend on left -->
+			<div class="col-xs-1 legend">
+			</div>
+
+			<!-- Days -->
+			<div class="col-xs-11 days">
+				<div class="day monday"></div>
+				<div class="day tuesday"></div>
+				<div class="day wednesday"></div>
+				<div class="day thursday"></div>
+				<div class="day friday"></div>
+				<div class="day saturday"></div>
+				<div class="day sunday"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<p ng-repeat="(slot, name) in slots">{{slot}}: {{name}}</p>
 </div>
