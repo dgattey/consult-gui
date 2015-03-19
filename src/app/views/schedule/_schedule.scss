@@ -8,8 +8,8 @@ div.schedule {
 	padding: 30px 0;
 
 	.calendar {
-		height: 500px;
-		border: 1px solid $color_text_mute;
+		height: 450px;
+		border: 1px solid $color_hover;
 		overflow-y: scroll;
 		.day {
 			float:left;
@@ -18,17 +18,16 @@ div.schedule {
 		.row, .days {
 			height: 100%;
 		}
-		.time-blocks, .legend-blocks {
+		.time-blocks {
 			position: relative;
 		}
-		.legend-blocks {
-			margin-top: 40px;
+		.legend {
+			background: $color_hover;
+			padding-top: 40px;
 		}
 		.legend-block {
-			position: absolute;
-			//background: $color_hover;
-			//display:block;
 			border-top: 2px solid $color_accent;
+			margin-bottom: 27px;
 			h5 {
 				font-size: 0.9em;
 				letter-spacing: 0.5px;

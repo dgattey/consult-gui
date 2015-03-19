@@ -148,9 +148,9 @@ angular.module('app.views.schedule', ['stringExtensions'])
 			var end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
 			
 			var height = (end - start) * 45 - 5;
-			var topOffset = (start-9) * 45;
+			var topOffset = ((start-9) * 48);
 			return {
-				'height': ''+height+'px', 
+				'height': ''+height+'px',
 				'margin-top': ''+topOffset+'px'
 			};
 		};

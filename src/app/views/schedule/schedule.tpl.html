@@ -4,12 +4,9 @@
 		<div class="row">
 			<!-- Legend on left -->
 			<div class="col-xs-1 legend">
-				<div class="legend-blocks">
-					<div class="legend-block" 
-						ng-repeat="hour in legend" 
-						ng-style="timeBlockStyle(hour)">
-						<h5>{{hour.start}}</h5>
-					</div>
+				<div class="legend-block" 
+					ng-repeat="hour in legend" >
+					<h5>{{hour.start}}</h5>
 				</div>
 			</div>
 
@@ -18,6 +15,9 @@
 				<div ng-repeat="day in days" class="day" id="{{day.title}}">
 					<h4>{{day.title}}</h4>
 					<div class="time-blocks">
+						<div ng-show="day.slots.length < 1" class="time-block">
+							<h5>No slots all day</h5>
+						</div>
 						<div class="time-block" 
 							ng-repeat="(slot,time) in day.slots" 
 							ng-style="timeBlockStyle(time)"
