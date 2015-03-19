@@ -23,10 +23,10 @@ module.exports = {
    */
   appFiles: {
     js: [ 'src/**/*.js', '!src/**/*.spec.js', '!src/assets/**/*.js' ],
-    assets: [ 'src/assets/**/*' ],
-    tpl: [ 'src/app/**/*.tpl.html', 'src/common/**/*.tpl.html', '!src/assets/**/*' ],
+    assets: [ 'src/assets/**/*.*', 'src/assets/**/*' ],
+    tpl: [ 'src/app/**/*.tpl.html', 'src/common/**/*.tpl.html' ],
     rootHtml: 'src/index.html',
-    sass: [ 'src/**/*.scss', '!src/assets/**/*' ],
+    sass: [ 'src/**/*.scss' ],
     rootSass: 'src/main.scss'
   },
 
@@ -56,20 +56,14 @@ module.exports = {
       'angular-bootstrap/ui-bootstrap-tpls.min.js',
       'angular-ui-router/release/angular-ui-router.min.js',
       'angular-ui-utils/ui-utils.min.js',
-      'angular-sanitize/angular-sanitize.min.js',
-			'jquery/jquery.js',
-			'jquery-ui/ui/jquery-ui.js',
-			'angular-ui-calendar/src/calendar.js',
-			'fullcalendar/fullcalendar.js',
-			'fullcalendar/gcal.js'
+      'angular-sanitize/angular-sanitize.min.js'
     ],
     map:[
       'angular/angular.min.js.map',
       'angular-sanitize/angular-sanitize.min.js.map'
     ],
     css:[
-      'bootstrap/dist/css/bootstrap.min.css',
-			'fullcalendar/fullcalendar.css'
+      'bootstrap/dist/css/bootstrap.min.css'
     ]
   },
 
