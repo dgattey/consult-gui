@@ -281,7 +281,8 @@ gulp.task('upload', ['compile'], function() {
 gulp.task('watch', ['build'], function () {
   connect.server({
     root: cfg.buildDir,
-    livereload: true
+    livereload: true,
+		port: 8888
   });
   watch({glob: cfg.appFiles.sass}, sassDev);
   watch({glob: cfg.appFiles.js}, jsDev );

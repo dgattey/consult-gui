@@ -5,12 +5,14 @@ angular.module('app.views.schedule', ['stringExtensions'])
 		$scope.headings = [];
 
 		// Variables for dates and times, set below
-		var meta = {},
-				current = {},
-				slots = {};
+		var meta = {}, // metadata
+				current = {}, // info about current week
+				slots = {}, // all the slots
+				shifts = {}; // shifts to their times
 
 		// Saves raw, newline delimited data to slots
-		function saveSlots(raw) {
+		function saveSlots(raw, location) {
+			if (location === undefined) location = slots; //default
 			var lines = raw.split('\n');
 			var i;
 			for (i = 0; i< lines.length; i++) {
@@ -19,8 +21,21 @@ angular.module('app.views.schedule', ['stringExtensions'])
 				var slot = line.substring(0, spaceIndex).trim();
 				var value = line.substring(spaceIndex).trim();
 				if (slot === '' || value === '') continue;
-				slots[slot] = value; // last version is saved, so if exists twice, whatever
+				location[slot] = value; // last version is saved, so if exists twice, whatever
 			}
+		}
+
+		// Loads in shift times to associate ids with times
+		function loadShiftTimes() {
+			return $q(function(resolve, reject) {
+				$http.get(schedLocation+'shifttimes').success(function(raw) {
+					saveSlots(raw, shifts);
+					resolve(shifts);					
+				}, function(error, data) {
+					console.log(error, data);
+					reject(error);
+				});
+			});
 		}
 
 		// Loads all the metadata from file to the meta object
@@ -86,6 +101,27 @@ angular.module('app.views.schedule', ['stringExtensions'])
 		// Saves data to frontend to visualize
 		function visualize() {
 			$scope.slots = slots;
+			tmpDays = {};
+
+			// Associates shift times with days
+			for (var slot in shifts) {
+				var val = shifts[slot];
+				var dayName = val.substring(0, val.indexOf(' '));
+				var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
+				daySlots[slot] = val.substring(val.indexOf(' ')).trim();
+				tmpDays[dayName] = {title:dayName, slots:daySlots};
+			}
+
+			// Order it and save it to frontend
+			$scope.days = [
+				tmpDays.Mon, 
+				tmpDays.Tue,
+				tmpDays.Wed,
+				tmpDays.Thu,
+				tmpDays.Fri,
+				tmpDays.Sat,
+				tmpDays.Sun
+			];
 		}
 			
 
@@ -95,7 +131,7 @@ angular.module('app.views.schedule', ['stringExtensions'])
 		 * 3. Load the current week
 		 * 4. Save to $scope the data for the current week + perm combined
 		 */
-		$q.all([loadMeta(), loadPerm()])
+		$q.all([loadMeta(), loadPerm(), loadShiftTimes()])
 			.then(parseCurrentDate)
 			.then(loadWeek)
 			.then(visualize, function(error){

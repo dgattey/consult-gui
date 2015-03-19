@@ -9,17 +9,15 @@
 
 			<!-- Days -->
 			<div class="col-xs-11 days">
-				<div class="day monday"></div>
-				<div class="day tuesday"></div>
-				<div class="day wednesday"></div>
-				<div class="day thursday"></div>
-				<div class="day friday"></div>
-				<div class="day saturday"></div>
-				<div class="day sunday"></div>
+				<div ng-repeat="day in days" class="day" id="{{day.title}}">
+					<h4>{{day.title}}</h4>
+					<div class="time-block" ng-repeat="(slot,time) in day.slots">
+						<h5>{{slots[slot]}}</h5>
+						<h6>{{time}}</h6>
+					</div>
+				</div>
 			</div>
 		</div>
 
 	</div>
-
-	<p ng-repeat="(slot, name) in slots">{{slot}}: {{name}}</p>
 </div>
