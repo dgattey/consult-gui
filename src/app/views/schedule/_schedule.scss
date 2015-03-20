@@ -7,8 +7,6 @@ div.schedule {
 	padding: 30px 0;
 
 	.calendar {
-		height: 450px;
-		overflow-y: scroll;
 		.day {
 			float:left;
 			width: 14.2857143%;
@@ -59,7 +57,6 @@ div.schedule {
 			position: absolute;
 			width: 80%;
 			background: $color_accent;
-			color: $color_text_light;
 			.time {
 				letter-spacing: 0.5px;
 				font-size: 0.8em;
