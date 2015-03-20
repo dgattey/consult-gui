@@ -1,5 +1,5 @@
-angular.module('app.views.schedule', ['stringExtensions'])
-	.controller('ScheduleCtrl', function ($scope, $rootScope, $http, StringExtensions, $q) {
+angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions'])
+	.controller('ScheduleCtrl', function ($scope, $rootScope, $http, StringExtensions, $q, $timeout) {
 		var schedLocation = 'assets/schedule/sunlab/sched.';
 		$rootScope.pageTitle = 'Schedule';
 		$scope.headings = [];
@@ -100,7 +100,7 @@ angular.module('app.views.schedule', ['stringExtensions'])
 
 		// Saves data to frontend to visualize
 		function visualize() {
-			$scope.slots = slots;
+			$scope.current = current;
 			tmpDays = {};
 
 			// Associates shift times with days
@@ -116,7 +116,7 @@ angular.module('app.views.schedule', ['stringExtensions'])
 				var endTime = val.substring(val.indexOf('-')+1);
 
 				var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
-				daySlots[slot] = {start: startTime, end: endTime};
+				daySlots[slot] = {start: startTime, end: endTime, user: slots[slot]};
 				tmpDays[dayName] = {title:dayName, slots:daySlots};
 			}
 
@@ -130,6 +130,39 @@ angular.module('app.views.schedule', ['stringExtensions'])
 				tmpDays.Sat,
 				tmpDays.Sun
 			];
+			var i, j;
+			for (i=0; i<$scope.days.length; i++) {
+				var d = $scope.days[i];
+				d.index = i+1;
+				for (slot in d.slots){
+					var data = d.slots[slot];
+					
+					// Coalescing users - next block
+					var tmp = slot;
+					var origSlotChar = slot.charCodeAt(0);
+					var nextSlot = String.fromCharCode(origSlotChar+1) + slot.charAt(1);
+					while (d.slots[nextSlot] && 
+							d.slots[nextSlot].user == data.user &&
+							d.slots[nextSlot].start == data.end) {
+						d.slots[nextSlot].start = data.start;
+						delete d.slots[tmp];
+						tmp = nextSlot;
+						nextSlot = String.fromCharCode(nextSlot.charCodeAt(0)+1)+slot.charAt(1);
+					}
+
+					// Coalescing users - two blocks away
+					tmp = slot;
+					nextSlot = String.fromCharCode(origSlotChar+2) + slot.charAt(1);
+					while (d.slots[nextSlot] &&
+							d.slots[nextSlot].user == data.user &&
+							d.slots[nextSlot].start == data.end) {
+						d.slots[nextSlot].start = data.start;
+						delete d.slots[tmp];
+						tmp = nextSlot;
+						nextSlot = String.fromCharCode(nextSlot.charCodeAt(0)+2)+slot.charAt(1);	
+					}
+				}
+			}
 
 			// The default times on the left
 			$scope.legend = [];
@@ -142,12 +175,22 @@ angular.module('app.views.schedule', ['stringExtensions'])
 
 		// Calculates top positioning of a time block given the time
 		$scope.timeBlockStyle = function(time) {
-			var splitStart = time.start.split(':');
-			var splitEnd = time.end.split(':');
-			var start = parseInt(splitStart[0])+(parseInt(splitStart[1])/60.0);
-			var end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
+			var start, end;
+			if (time) {
+				var splitStart = time.start.split(':');
+				var splitEnd = time.end.split(':');
+				start = parseInt(splitStart[0])+(parseInt(splitStart[1])/60.0);
+				end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
+			}
+			else {
+				var now = new Date();
+				var min = parseInt(now.getMinutes());
+				var hour = parseInt(now.getHours());
+				start = (min/60.0) + hour;
+				end = start;
+			}
 			
-			var height = (end - start) * 45 - 5;
+			var height = (end - start) * 48 - 2;
 			var topOffset = ((start-9) * 48);
 			return {
 				'height': ''+height+'px',

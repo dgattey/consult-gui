@@ -2,18 +2,37 @@
  * SCHEDULE
  * This file contains styles specific to the schedule template of the app
  */
-
 div.schedule {
 	margin-top: $header_size;
 	padding: 30px 0;
 
 	.calendar {
 		height: 450px;
-		border: 1px solid $color_hover;
 		overflow-y: scroll;
 		.day {
 			float:left;
 			width: 14.2857143%;
+		}
+		#currTime {
+			position: absolute;	
+			width: 95%;
+			z-index: 10;
+			padding-top: 20px;
+			hr {
+				display: inline-block;
+				width: 100%;
+				margin: 0;
+				margin-top: 17px;
+				padding: 0;
+				border: 1px solid hsla(200, 100%, 75%, 0.7);
+			}
+		}
+		.today {
+			h4 {
+				color: lighten($color_accent, 20%);
+				font-weight: 700;
+				padding-left: 5px;
+			}
 		}
 		.row, .days {
 			height: 100%;
@@ -38,13 +57,30 @@ div.schedule {
 			padding-left: 10px;
 			margin-bottom: 5px;
 			position: absolute;
-			width: 92%;
+			width: 80%;
 			background: $color_accent;
 			color: $color_text_light;
+			.time {
+				letter-spacing: 0.5px;
+				font-size: 0.8em;
+				color: $color_text_mute;
+			}
 			h5 { 
 				font-size: 0.9em;
 				letter-spacing: 1.5px;
 				color: $color_text_light;
+			}
+			&.subbed {
+				h5 {
+					color: $color_hover;
+				}
+				background: darken($color_accent, 5%);
+			}
+			&.me {
+				h5 {
+					font-size: 1.1em;
+				}
+				background: lighten($color_accent, 10%);
 			}
 		}
 	}
@@ -54,5 +90,29 @@ div.schedule {
 	div.schedule {
 		margin-top: $header_size/2;
 		padding: 0 0 30px 0;
+		.calendar {
+			height: 600px;
+			.day {
+				display: inline-block;
+				float: none;
+				width: 48%;
+				margin-right: 2%;
+				.time-block {
+					position: relative;
+					padding-top: 5px;
+					padding-bottom: 0;
+					margin-top: 0!important;
+				}
+			}
+		}
+	}
+}
+
+@media screen and (max-width: 480px) {
+	div.schedule {
+		.calendar .day {
+			width: 100%;
+			margin-right: 0;
+		}
 	}
 }
