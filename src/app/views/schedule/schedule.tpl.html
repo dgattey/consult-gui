@@ -26,7 +26,7 @@
 						<div class="time-block" 
 							ng-repeat="(slot,time) in day.slots" 
 							ng-style="timeBlockStyle(time)"
-							ng-class="{me: time.user==cslogin, subbed: time.subbed!=undefined}"
+							ng-class="{me: time.user==cslogin, subbed: time.free}"
 							ng-hide="time.user == 'CLOSED'"
 							tooltip="{{time.start}} to {{time.end}}"
 							tooltip-trigger 

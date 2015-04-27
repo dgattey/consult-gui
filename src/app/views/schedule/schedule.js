@@ -21,7 +21,10 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 				var slot = line.substring(0, spaceIndex).trim();
 				var value = line.substring(spaceIndex).trim();
 				if (slot === '' || value === '') continue;
-				location[slot] = value; // last version is saved, so if exists twice, whatever
+				
+				// Free slot?
+				if (value.indexOf('FREE') > -1) location[slot] = 'FREE';
+				else location[slot] = value; // last version is saved, so if exists twice, whatever
 			}
 		}
 
@@ -116,7 +119,13 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 				var endTime = val.substring(val.indexOf('-')+1);
 
 				var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
-				daySlots[slot] = {start: startTime, end: endTime, user: slots[slot]};
+				var free = slots[slot] == 'FREE';
+				daySlots[slot] = {
+					start: startTime, 
+					end: endTime, 
+					user: free ? 'Available for sub!' : slots[slot], 
+					free: free
+				};
 				tmpDays[dayName] = {title:dayName, slots:daySlots};
 			}
 
@@ -179,13 +188,13 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 			if (time) {
 				var splitStart = time.start.split(':');
 				var splitEnd = time.end.split(':');
-				start = parseInt(splitStart[0])+(parseInt(splitStart[1])/60.0);
-				end = parseInt(splitEnd[0])+(parseInt(splitEnd[1])/60.0);
+				start = parseInt(splitStart[0], 10)+(parseInt(splitStart[1], 10)/60.0);
+				end = parseInt(splitEnd[0], 10)+(parseInt(splitEnd[1], 10)/60.0);
 			}
 			else {
 				var now = new Date();
-				var min = parseInt(now.getMinutes());
-				var hour = parseInt(now.getHours());
+				var min = parseInt(now.getMinutes(), 10);
+				var hour = parseInt(now.getHours(), 10);
 				start = (min/60.0) + hour;
 				end = start;
 			}
