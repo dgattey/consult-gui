@@ -1,6 +1,6 @@
 {
   "name": "consult-gui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "dependencies": {
     "angular": "~1.2.22",
     "bootstrap": "~3.1",

@@ -29,14 +29,14 @@
 				</div>
 				
 				<div ng-repeat="day in days" 
-					ng-class="{day: true, today: current.day==day.index}" 
+					ng-class="{day: true, today: current.day==day.index && weekOffset == 0}" 
 					id="{{day.title}}">
 					<h4>{{day.title}}</h4>
 					<div class="time-blocks">
 						<div class="time-block" 
 							ng-repeat="(slot,time) in day.slots" 
 							ng-style="timeBlockStyle(time)"
-							ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected}"
+							ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected, current: showsCurrent(day, time)}"
 							ng-hide="time.user == 'CLOSED'"
 							ng-click="timeBlockClicked(time.user)"
 							tooltip="{{time.start}} to {{time.end}}"
@@ -44,6 +44,8 @@
 							tooltip-animation="true" 
 							tooltip-placement="top">
 							<h5>{{time.user}}
+								<span ng-show="showsCurrent(day, time)">(Current)</span>
+								<span ng-show="time.user==cslogin">(Me)</span>
 								<span class="visible-xs hidden-sm hidden-md hidden-lg time"> {{time.start}} - {{time.end}}</span>
 							</h5>
 						</div>

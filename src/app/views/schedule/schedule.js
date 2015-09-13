@@ -7,7 +7,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 
 	// Variables for dates and times, set below
 	var meta = {}, // metadata
-	current = {}, // info about current week
+		current = {}, // info about current week
 		slots = {}, // all the slots
 		shifts = {}; // shifts to their times
 
@@ -95,6 +95,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 
 			current.week = Math.floor(diff/(3600*24*7*1000)) + $scope.weekOffset; // week number 0-max
 			current.day = (now.getDay() + 6) % 7 + 1; //1 -7 like data format
+			current.time = now.getHours() + now.getMinutes() / 60.0;
 
 			// Check data and make sure valid
 			if (current.week < 0 || current.week > meta.weeks) {
@@ -124,6 +125,20 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		endDate.setHours($scope.weekOffset * 7 * 24);
 		$scope.weekEnd = endDate;
 	}
+
+	// Converts '08:20' to 8.33333
+	var convertStrDate = function(str) {
+		var times = str.split(':');
+		return parseInt(times[0]) + parseInt(times[1]) / 60.0;
+	};
+
+	// Whether a given slot should show as current
+	$scope.showsCurrent = function(day, time) {
+		return $scope.weekOffset === 0 && 
+			$scope.current.day == day.index &&
+			$scope.current.time >= convertStrDate(time.start) && 
+			$scope.current.time <= convertStrDate(time.end);
+	};
 
 	// Saves data to frontend to visualize
 	function visualize() {
