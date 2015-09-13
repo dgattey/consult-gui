@@ -16,7 +16,7 @@ module.exports = {
     assets: ['src/assets/**/*'],
     tpl: ['src/**/*.tpl.html'],
     rootHtml: 'src/index.html',
-    sass: ['src/app/**/*.scss'],
+    sass: ['src/app/**/*.scss', 'src/**/*.scss'],
     rootSass: 'src/main.scss'
   },
 
@@ -60,7 +60,7 @@ module.exports = {
       'angular.min.js.map'
     ],
     css: [
-      'bootstrap/dist/css/bootstrap.min.css'
+      'bootstrap.min.css'
     ],
     fonts: [
     ]

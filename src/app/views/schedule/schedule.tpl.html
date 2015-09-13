@@ -1,8 +1,19 @@
 <div class="schedule container" ng-controller="ScheduleCtrl">
-<h1 class="page-heading-title col-xs-12">{{pageTitle}} 
-	<span class="change-week" ng-click="weekOffset = weekOffset + 1">&gt;</span> 
-	<span class="change-week" ng-click="weekOffset = weekOffset - 1">&lt;</span>
-	<span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span></h1>
+	<h1 class="page-heading-title col-xs-12">
+	<div class="col-lg-10 col-sm-9">
+		{{pageTitle}} 
+		<span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span>
+	</div>
+	<div class="row">
+		<div class="col-lg-2 col-sm-3 week-changers">
+			<span class="change-week">
+				<span ng-click="weekOffset = weekOffset - 1">&lt;</span>
+				<span ng-click="weekOffset = weekOffset + 1">&gt;</span>
+			</span>
+			<span class="change-week today" ng-click="weekOffset = 0">Today</span>
+		</div>
+	</div>
+	</h1>
 	<div class="no-schedule" ng-hide="days">
 		<div class="container">
 			<h3>No schedule</h3>

@@ -14,12 +14,21 @@ div.schedule {
 	
 	.change-week {
 		display: inline-block;
-		padding-left: 30px;
+		padding-left: 20px;
 		cursor: pointer;
-		font-size: 1.5em;
+		font-size: 1.4em;
 		font-weight: 900;
+		text-align: right;
 		float: right;
+		&.today {
+			display: block;
+			font-weight: 600;
+			font-size: 0.75em;
+			letter-spacing: 0;
+		}
 	}
+
+
 
 	.week-of {
 		display: block;
@@ -135,6 +144,23 @@ div.schedule {
 					padding-bottom: 50px;
 					margin-top: 0!important;
 				}
+			}
+		}
+		.week-changers {
+			padding-top: 30px;
+		}
+
+		.change-week {
+			display: block;
+			text-align: left;
+			width: 50%;
+			float: left;
+			span {
+				padding-right: 10px;
+			}
+			&.today {
+				padding-top: 10px;
+				font-size: 0.9em;
 			}
 		}
 	}
