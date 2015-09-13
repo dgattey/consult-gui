@@ -59,7 +59,7 @@ div.schedule {
 		}
 		.today {
 			h4 {
-				color: lighten($color_accent, 20%);
+				color: $color_accent_green;
 				font-weight: 700;
 			}
 		}
