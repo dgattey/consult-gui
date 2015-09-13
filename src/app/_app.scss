@@ -48,3 +48,10 @@ h1 {
 	}
 }
 
+@media screen and (max-width: 767px) {
+	.page-heading-title {
+		font-size: 2em;
+		padding: 20px 30px 10px 30px;
+	}
+}
+
