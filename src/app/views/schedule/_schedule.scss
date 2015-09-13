@@ -71,7 +71,7 @@ div.schedule {
 				h5 {
 					color: $color_hover;
 				}
-				background: darken($color_accent, 5%);
+				background: lighten(desaturate($color_accent, 45%), 20%);
 			}
 			&.me {
 				h5 {
