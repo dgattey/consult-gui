@@ -20,6 +20,13 @@ angular.module('app.views.people', ['phoneFilter'])
 				if (person.test(line)) {
 					var m = person.exec(line);
 					heading.people.push({name: m[1].trim(), phone: m[2]});
+
+					// TODO: Do in global scope - may need to refactor this code to module
+					// Add name to search results
+					$rootScope.searchResults.push({
+						title: m[1].trim(),
+						state: 'people'
+					});
 				}
 
 				// End of a heading

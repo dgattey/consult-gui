@@ -1,5 +1,5 @@
 <div class="schedule container" ng-controller="ScheduleCtrl">
-	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>	
+<h1 class="page-heading-title col-xs-12">{{pageTitle}} <span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span></h1>
 	<div class="col-xs-12 calendar">
 		<div class="row">
 			<!-- Legend on left -->

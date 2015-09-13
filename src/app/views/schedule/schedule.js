@@ -1,6 +1,7 @@
 angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions'])
 	.controller('ScheduleCtrl', function ($scope, $rootScope, $http, StringExtensions, $q, $timeout) {
 		var schedLocation = 'assets/schedule/sunlab/sched.';
+		var schedLocationMain = 'assets/schedule/sunlab/sched';
 		$rootScope.pageTitle = 'Schedule';
 		$scope.headings = [];
 
@@ -31,6 +32,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		// Loads in shift times to associate ids with times
 		function loadShiftTimes() {
 			return $q(function(resolve, reject) {
+				console.log("Loading shift times");
 				$http.get(schedLocation+'shifttimes').success(function(raw) {
 					saveSlots(raw, shifts);
 					resolve(shifts);					
@@ -44,6 +46,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		// Loads all the metadata from file to the meta object
 		function loadMeta() {
 			return $q(function(resolve, reject) {
+				console.log("Loading meta ");
 				$http.get(schedLocation+'meta').success(function(raw) {
 					var splits = raw.split(' ');
 					meta.startDate = new Date(splits[0]);
@@ -61,7 +64,8 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		// Loads in the current perm schedule to slots
 		function loadPerm() {
 			return $q(function(resolve, reject) {
-				$http.get(schedLocation+'perm').success(function(raw) {
+				console.log("Loading perm ");
+				$http.get(schedLocationMain).success(function(raw) {
 					saveSlots(raw);
 					resolve(slots);
 				}, function(error, data) {
@@ -74,6 +78,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		// Loads in the current week's schedule to slots - assumes perm is loaded
 		function loadWeek() {
 			return $q(function(resolve, reject) {
+				console.log("Loading week "+ current.week);
 				$http.get(schedLocation+'week.'+current.week).success(function(raw) {
 					saveSlots(raw);
 					resolve(slots);
@@ -88,6 +93,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 		function parseCurrentDate() {
 			return $q(function(resolve, reject) {
 				var now = new Date();
+				saveWeekDateSpan();
 				var diff = now.getTime() - meta.startDate.getTime();
 
 				current.week = Math.floor(diff/(3600*24*7*1000)); // week number 0-max
@@ -99,6 +105,24 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 				}
 				else resolve(current);
 			});
+		}
+
+		// Gets the first & last days of the week and saves it
+		function saveWeekDateSpan() {
+
+			// Get the Monday
+			var startDate = new Date();
+			var day = startDate.getDay() || 7;  
+			if( day !== 1 ) 
+				startDate.setHours(-24 * (day - 1)); 
+			$scope.weekStart = startDate;
+
+			// Get the Sunday
+			var endDate = new Date();
+			day = endDate.getDay() || 7;
+			if (day != 7)
+				endDate.setHours(24 * (day - 1));
+			$scope.weekEnd = endDate;
 		}
 
 		// Saves data to frontend to visualize
@@ -123,7 +147,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 				daySlots[slot] = {
 					start: startTime, 
 					end: endTime, 
-					user: free ? 'Available for sub!' : slots[slot], 
+					user: free ? 'Needs sub!' : slots[slot], 
 					free: free
 				};
 				tmpDays[dayName] = {title:dayName, slots:daySlots};

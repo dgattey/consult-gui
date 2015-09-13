@@ -13,11 +13,11 @@ module.exports = {
   // File patterns for app code
   app: {
     js: ['src/**/*.js', '!src/assets/**/*.js'],
-    assets: ['src/assets/**/*.*'],
+    assets: ['src/assets/**/*'],
     tpl: ['src/**/*.tpl.html'],
     rootHtml: 'src/index.html',
-    sass: ['src/**/*.scss'],
-    rootSass: 'src/app.scss'
+    sass: ['src/app/**/*.scss'],
+    rootSass: 'src/main.scss'
   },
 
   // Folders to build into

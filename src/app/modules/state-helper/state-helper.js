@@ -5,7 +5,7 @@ angular.module('app.modules.stateHelper', [])
     // Utility to associate a partial or nonexistent template url with the actual file
     var processTemplateURL = function(item) {
       var part = item.partURL ? item.partURL : item.id;
-      return {templateUrl : 'views/'+part+'/'+part+'.tpl.html'};
+      return {templateUrl : 'app/views/'+part+'/'+part+'.tpl.html'};
     };
 
     // Given a parent view, creates @absolute views from children
@@ -25,7 +25,7 @@ angular.module('app.modules.stateHelper', [])
        */
     var configState = function(item) {
       var subviews = createStateViews(item);
-      var url = item.default ? '/' : '/'+item.url;
+      var url = item['default'] ? '/' : '/'+item.url;
       var obj = { url: url, views: subviews };
       $stateProvider.state(item.id, obj);
 
@@ -52,7 +52,7 @@ angular.module('app.modules.stateHelper', [])
 
       var page = { id: id, partURL: 'content'};
       page.url = url;
-      if (def === true) page.default = true; // default?
+      if (def === true) page['default'] = true; // default?
 
       // Content template
       var content = { id: genericTPL };

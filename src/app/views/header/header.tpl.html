@@ -23,10 +23,10 @@
         <div class="form-group" id="search">
 					<input type="text" class="form-control" placeholder="Search" ng-model="query">
 					<ul class="search-results" ng-show="query">
-						<li ng-repeat="item in navigation | filter: query">
+						<li ng-repeat="item in searchResults | filter: query">
 							<a ui-sref={{item.state}}>{{item.title}}</a>
 						</li>
-						<li ng-show="(navigation | filter: query).length < 1">No results found</li>
+						<li ng-show="(searchResults | filter: query).length < 1">No results found</li>
 					</ul>
 
         </div>
