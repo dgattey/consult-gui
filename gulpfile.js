@@ -1,321 +1,224 @@
-// gulp
-var gulp        = require('gulp');
-
-// gulp extensions
-var gutil       = require('gulp-util'),
-    sass        = require('gulp-sass'),
+var gulp        = require('gulp'),
+    gutil       = require('gulp-util'),
+    gsass       = require('gulp-sass'),
     inject      = require('gulp-inject'),
-    multinject  = require('gulp-multinject'),
     watch       = require('gulp-watch'),
-    filter      = require('gulp-filter'),
     ngHtml2Js   = require('gulp-ng-html2js'),
+    minifyHtml  = require('gulp-minify-html'),
+    concat      = require('gulp-concat'),
+    uglify      = require('gulp-uglify'),
+    csso        = require('gulp-csso'),
+    del         = require('del'),
     replacer    = require('gulp-replace'),
-
-    //test
     jshint      = require('gulp-jshint'),
     stylish     = require('jshint-stylish'),
+    ngAnnotate  = require('gulp-ng-annotate'),
 
-    //optimize
-    csso        = require('gulp-csso'),
-    uglify      = require('gulp-uglify'),
-    ngmin       = require('ng-annotate'),
-    concat      = require('gulp-concat'),
-    jsonminify  = require('gulp-jsonminify')
-
-    //utilities
-    psTree      = require('ps-tree'),
-    rimraf      = require('rimraf'),
-    mergeStream = require('merge-stream'),
-
-    //package
+    // Meta
+    merge       = require('merge-stream'),
+    addsrc      = require('gulp-add-src'),
+    connect     = require('gulp-connect'),
     bump        = require('gulp-bump'),
+    sftp        = require('gulp-sftp'),
     semver      = require('semver'),
-    fs          = require('fs'),
-    sftp        = require("gulp-sftp"),
 
-    // development server
-    connect     = require('gulp-connect');
+    // Config
+    cfg         = require('./build.config.js'),
+    pkg         = require(cfg.pkg);
 
-/**
- * Load in our build configuration file.
- */
-var cfg = require( './build.config.js' );
-var pjson = require( cfg.packageJSON[0] );
-var jshintOptions = {
-  predef: ['angular'],
-  browser: true
-};
+/////////////////////////////////////////////////////////////
 
-function prefixVendor(globArray, notFinal) {
-  var dir = notFinal ? cfg.vendorDir : cfg.destDirs.vendor;
-  var prefix = function(a){return dir + "**/" + a};
+// Other configuration - makes sure that vendor files work as globs
+cfg.vendor.js = prefixVendor(cfg.vendor.js);
+cfg.vendor.map = prefixVendor(cfg.vendor.map);
+cfg.vendor.css = prefixVendor(cfg.vendor.css);
+cfg.vendor.fonts = prefixVendor(cfg.vendor.fonts);
+
+// Prefixes vendor files with their actual location
+function prefixVendor(globArray) {
+  var prefix = function(a){return cfg.vendor.src + '/**/' + a; };
   return globArray.map(prefix);
 }
 
-// --- Streaming DEV/DIST Functions ---
-function copyVendor(){
-
-  var vendorJS = gulp.src( prefixVendor(cfg.vendorFiles.js, true) );
-  var vendorMap = gulp.src( prefixVendor(cfg.vendorFiles.map, true) );
-  var vendorCSS = gulp.src( prefixVendor(cfg.vendorFiles.css, true) );
-
-  var allVendor = mergeStream(vendorJS, vendorMap);
-  allVendor = mergeStream(allVendor, vendorCSS);
-
-  return allVendor
-    .pipe( gulp.dest( cfg.destDirs.vendor ) );
+// Sets production status to true
+function setPro() {
+  cfg.production = true;
+  gutil.log('Production status is true');
 }
 
-function sassDev(){
-  var vCss = gulp.src( prefixVendor(cfg.vendorFiles.css) );
-  var appCss = gulp.src( cfg.appFiles.rootSass )
-
-  var allCss = mergeStream(vCss, appCss)
-    .pipe( sass({ errLogToConsole: true }));
-
-  return allCss
-    .pipe( gulp.dest( cfg.buildDir+cfg.destDirs.css  ) )
-    .pipe( connect.reload() );
-}
-function sassDist(){
-  var vCss = gulp.src( prefixVendor(cfg.vendorFiles.css) );
-
-  var appCss = gulp.src( cfg.appFiles.rootSass )
-    .pipe( sass({ errLogToConsole: false, style: 'compressed' }))
-    .pipe( csso() );
-
-  return mergeStream(vCss, appCss)
-    .pipe( concat('app.min.css') )
-    .pipe( gulp.dest( cfg.distDir+cfg.destDirs.css  ) );
+// Deletes build directory
+function clean() {
+  return del([cfg.build+'**/*', cfg.build]);
 }
 
-function jsDev(files){
-  return files
-    .pipe( jshint( jshintOptions ) )
-    .pipe( jshint.reporter( stylish ) )
-    .pipe( gulp.dest( cfg.buildDir+cfg.destDirs.js  ) )
-    .pipe( connect.reload() );
+// Compiles vendor and app sass together into one file in build dir
+function sass(){
+  gulp.src(cfg.app.rootSass)
+    .pipe(gsass({style: 'compressed'}))
+    .on('error', function(err){
+      gutil.log('\x1b[31msass error\x1b[39m:\n'+err.messageFormatted);
+    })
+    .pipe(cfg.production ? csso() : gutil.noop())
+    .pipe(cfg.production ? concat(cfg.min.css) : gutil.noop())
+    .pipe(gulp.dest(cfg.build+cfg.dest.css))
+    .pipe(connect.reload());
+  return gulp.src(cfg.vendor.css)
+    .pipe(concat(cfg.min.vendorCSS))
+    .pipe(gulp.dest(cfg.build+cfg.dest.css))
+    .pipe(connect.reload());
 }
-function jsDist(files){
-  return files
-    .pipe(replacer("html5Mode(false)", function() {
+
+// Copies js files into build dir
+function js(){
+  return gulp.src(cfg.app.js)
+    .pipe(cfg.production ? gutil.noop() : jshint())
+    .pipe(cfg.production ? gutil.noop() : jshint.reporter(stylish))
+    .pipe(cfg.production ? replacer("html5Mode(false)", function() {
       return "html5Mode(true)";
-    }))
-    .pipe( jshint( jshintOptions ) )
-    .pipe( jshint.reporter( stylish ) )
-    .pipe( ngmin() )
-    .pipe( uglify() )
-    .pipe( concat('app.min.js') )
-    .pipe( gulp.dest( cfg.distDir+cfg.destDirs.js ) )
+    }) : gutil.noop())
+    .pipe(ngAnnotate()).on('error', function(err){
+      gutil.log('\x1b[31mjs error\x1b[39m: '+err.message);
+    })
+    .pipe(cfg.production ? uglify() : gutil.noop())
+    .pipe(cfg.production ? concat(cfg.min.js) : gutil.noop())
+    .pipe(gulp.dest(cfg.build+cfg.dest.js))
+    .pipe(connect.reload());
 }
 
-function vendorDev(files){
-  return files
-    .pipe( gulp.dest( cfg.buildDir+cfg.destDirs.vendor ) )
-    .pipe( connect.reload() );
-}
-function vendorDist(files){
-  return files
-    .pipe( concat('vendor.min.js') )
-    .pipe( gulp.dest( cfg.distDir+cfg.destDirs.vendor ) );
+// Copies vendor js files into build dir
+function vendor(){
+  return gulp.src(cfg.vendor.js)
+    .pipe(concat(cfg.min.vendorJS))
+    .pipe(gulp.dest(cfg.build+cfg.dest.js))
+    .pipe(connect.reload());
 }
 
-function templatesDev(files){
-  return files
-    .pipe( ngHtml2Js({ moduleName: "app.partials"}) )
+// Converts HTML partials to minified JS and copies into build dir
+function templates(){
+  return gulp.src(cfg.app.tpl)
+    .pipe(minifyHtml({empty: true,spare: true,quotes: true}))
+    .pipe(ngHtml2Js({moduleName: 'app.partials'}))
+    .pipe(cfg.production ? concat(cfg.min.partials) : gutil.noop())
+    .pipe(ngAnnotate())
+    .pipe(cfg.production ? uglify() : gutil.noop())
     .pipe(replacer(/x.x.x/, function() {
-        return pjson.version;
+        return pkg.version;
     }))
-    .pipe( gulp.dest( cfg.buildDir+cfg.destDirs.js ) )
-    .pipe( connect.reload() );
-}
-function templatesDist(files){
-  return files
-    .pipe( ngHtml2Js({ moduleName: "app.partials"}) )
-    .pipe( uglify() )
-    .pipe( concat('partials.min.js') )
-    .pipe(replacer(/x.x.x/, function() {
-        return pjson.version;
-    }))
-    .pipe( gulp.dest( cfg.distDir+cfg.destDirs.js ) );
+    .pipe(gulp.dest(cfg.build+cfg.dest.js))
+    .pipe(connect.reload());
 }
 
-function assetsDev(files) {
-  return files
-    .pipe( gulp.dest( cfg.buildDir+cfg.destDirs.assets ) )
-    .pipe( connect.reload() );
-}
-function assetsDist(files) {
-  var filterJson = filter('**/*.json');
-  return files
-    .pipe( filterJson )
-    .pipe( jsonminify() )
-    .pipe( filterJson.restore() )
-    .pipe( gulp.dest( cfg.distDir+cfg.destDirs.assets ) );
+// Copies assets into build dir
+function assets() {
+  return gulp.src(cfg.app.assets)
+    .pipe(gulp.dest(cfg.build+cfg.dest.assets))
+    .pipe(connect.reload());
 }
 
-function rootHtmlDev() {
-  var vendor = prefixVendor(cfg.vendorFiles.js);
-  var vendorCss = cfg.buildDir+cfg.destDirs.css+'**/dist/**/*.css';
-  var css = cfg.buildDir+cfg.destDirs.css+'**/*.css';
-  var js = cfg.buildDir+cfg.destDirs.js+'**/*.js';
-  var combo = [];
-  for (var i = 0; i <= vendor.length - 1; i++) {
-    combo.push(vendor[i]);
+// Copies vendor fonts into build dir
+function fonts() {
+  return gulp.src(cfg.vendor.fonts)
+    .pipe(gulp.dest(cfg.build+cfg.dest.fonts))
+    .pipe(connect.reload());
+}
+
+// Injects js and css files into the root HTML file
+function html() {
+  var js = gulp.src(cfg.compiled.js, {read: false, root: cfg.build});
+  var css = gulp.src(cfg.compiled.css, {read: false, root: cfg.build});
+  var combo = merge(js, css)
+    .pipe(addsrc.prepend(cfg.build+'/**/'+cfg.min.vendorJS))
+    .pipe(addsrc.prepend(cfg.build+'/**/'+cfg.min.vendorCSS));
+  return gulp.src(cfg.app.rootHtml)
+    .pipe(replacer(/href="\/preview\/"/, function() {
+        return "href=\"/\"";
+    }))
+    .pipe(inject(combo, {
+      ignorePath: cfg.build,
+      addPrefix: cfg.production ? cfg.dest.prefix : ''}))
+    .pipe(cfg.production ? minifyHtml({
+        empty: true,
+        spare: true,
+        quotes: true
+    }) : gutil.noop())
+    .pipe(gulp.dest(cfg.build))
+    .pipe(connect.reload());
+}
+
+// Bumps the version numbers in bower and package JSON files
+// Requires type, one of patch, minor, or major
+function doBump(type){
+
+  // Determines type of bump
+  var v = pkg.version;
+  if (!type) {
+    var dot = v.indexOf('.');
+    var major = parseInt(v.slice(0, dot));
+    var minor = parseInt(v.slice(dot+1).slice(0, dot));
+    var patch = parseInt(v.slice(dot+1).slice(dot+1));
+    var type = patch<=10 ? 'patch' : minor<=10 ? 'minor' : 'major';
   }
-  combo.push(vendorCss);
-  combo.push(css);
-  combo.push(js);
-  var comboStream = gulp.src( combo, {read: false} );
 
-  return gulp.src( cfg.appFiles.rootHtml )
-    .pipe(replacer(/preview\//, function() {
-        return "";
-    }))
-    .pipe( inject( comboStream,
-      {
-        addRootSlash: false,
-        ignorePath: cfg.buildDir
-      }))
-    .pipe( gulp.dest( cfg.buildDir ) )
-    .pipe( connect.reload() );
-}
-function rootHtmlDist() {
-  var vendor = gulp.src( cfg.distDir+cfg.destDirs.vendor+'**/*.js', {read: false} );
-  var css = gulp.src( cfg.distDir+cfg.destDirs.css+'**/*.css', {read: false} );
-  var js = gulp.src( cfg.distDir+cfg.destDirs.js+'**/*.js', {read: false} );
-
-  return gulp.src( cfg.appFiles.rootHtml )
-    .pipe( inject( mergeStream(css, vendor, js),
-      {
-        addRootSlash: false,
-        ignorePath: cfg.distDir
-      }))
-    .pipe( gulp.dest( cfg.distDir ) );
+  var newVer = semver.inc(v);
+  return gulp.src([cfg.bower, cfg.pkg])
+    .pipe(bump({version: newVer, type: type}))
+    .pipe(gulp.dest('.'));
 }
 
-function bump(mode){
-  var pkg = require( './package.json' );
-  var newVer = semver.inc(pkg.version, mode);
-  return gulp.src(['./bower.json', './package.json', '**/src/package.json'])
-    .pipe( bump({'version':newVer}) )
-    .pipe( gulp.dest('./') );
+
+// Uploads files to remote
+function upload() {
+  return gulp.src(cfg.build+'/**')
+    .pipe(sftp(cfg.server));
 }
 
-// --- Tasks ---
-// CLEAN
-gulp.task('clean', function(cb) {
-  rimraf(cfg.buildDir, cb);
-});
-gulp.task('clean-dist', function(cb) {
-  rimraf(cfg.buildDir, function(){});
-  rimraf(cfg.distDir, cb);
-});
+// Used in watch - prints that watch is running the function
+function go(name, func) {
+  gutil.log('Watch triggered for \''+gutil.colors.green(name)+'\'');
+  func();
+}
 
-// COPY
-gulp.task('copy-vendor-dev', ['clean'], function(){
-  return copyVendor();
-});
-gulp.task('copy-vendor-dist', ['clean-dist'], function(){
-  return copyVendor();
-});
+// Used in watch - quits with strong message
+function quit() {
+  var message = 'Exiting Gulp: metafile (gulpfile or config) was changed';
+  gutil.log(gutil.colors.red(message));
+  process.exit(1);
+}
 
-// SASS
-gulp.task('sass-dev', ['clean', 'copy-vendor-dev'], function() {
-  return sassDev();
-});
-gulp.task('sass-dist', ['clean-dist', 'copy-vendor-dist'], function() {
-  return sassDist();
-});
-
-// JAVASCRIPT
-gulp.task('js-dev', ['clean', 'copy-vendor-dev'], function() {
-  return jsDev( gulp.src( cfg.appFiles.js ) );
-
-});
-gulp.task('js-dist', ['clean-dist', 'copy-vendor-dist'], function() {
-  return jsDist( gulp.src( cfg.appFiles.js ) );
-});
-
-gulp.task('vendor-dev', ['clean', 'copy-vendor-dev'], function(){
-  return vendorDev( mergeStream( 
-    gulp.src( prefixVendor(cfg.vendorFiles.js), {base: "vendor"} ),
-    gulp.src( prefixVendor(cfg.vendorFiles.map), {base: "vendor"} ) 
-  ) );
-})
-gulp.task('vendor-dist', ['clean-dist', 'copy-vendor-dist'], function(){
-  return vendorDist( gulp.src( prefixVendor(cfg.vendorFiles.js), {base: "vendor"} ) );
-})
-
-// TEMPLATES
-gulp.task('templates-dev', ['clean', 'copy-vendor-dev'],  function() {
-  return templatesDev( gulp.src( cfg.appFiles.tpl ) );
-});
-gulp.task('templates-dist', ['clean-dist', 'copy-vendor-dist'],  function() {
-  return templatesDist( gulp.src( cfg.appFiles.tpl ) );
-});
-
-// ASSETS
-gulp.task('assets-dev', ['clean', 'copy-vendor-dev'], function() {
-  return assetsDev( gulp.src( cfg.appFiles.assets ) );
-});
-gulp.task('assets-dist', ['clean-dist', 'copy-vendor-dist'], function() {
-  return assetsDist( gulp.src( cfg.appFiles.assets ) );
-});
-
-// INDEX
-gulp.task('root-html-dev', ['clean', 'copy-vendor-dev', 'js-dev', 'sass-dev', 'vendor-dev', 'templates-dev'], rootHtmlDev);
-gulp.task('root-html-dist', ['clean-dist', 'copy-vendor-dist', 'js-dist', 'sass-dist', 'vendor-dist', 'templates-dist'], rootHtmlDist);
-
-// UPLOADS ALL FILES IN DIST TO REMOTE
-gulp.task('upload', ['compile'], function() {
-  return gulp.src(cfg.distDir+'**/')
-        .pipe(sftp({
-            host: cfg.server,
-            auth: 'keyMain',
-            remotePath: cfg.serverDir
-        }));
-});
-
-// WATCHES FILES
+// Tasks
+gulp.task('production', setPro);
+gulp.task('clean', clean);
+gulp.task('sass', ['clean', 'vendor'], sass);
+gulp.task('js', ['clean', 'vendor'], js);
+gulp.task('vendor', ['clean'], vendor);
+gulp.task('templates', ['clean', 'vendor'], templates);
+gulp.task('assets', ['clean', 'vendor'], assets);
+gulp.task('fonts', ['clean', 'vendor'], fonts);
+gulp.task('html', ['vendor', 'js', 'sass', 'assets', 'fonts', 'templates'], html);
+gulp.task('upload', ['html'], upload);
 gulp.task('watch', ['build'], function () {
   connect.server({
-    root: cfg.buildDir,
+    root: cfg.build,
     livereload: true,
-		port: 8888
+    port: 8888
   });
-  watch({glob: cfg.appFiles.sass}, sassDev);
-  watch({glob: cfg.appFiles.js}, jsDev );
-  watch({glob: cfg.appFiles.rootHtml}, rootHtmlDev );
-  watch({glob: cfg.appFiles.tpl}, templatesDev );
-  watch({glob: cfg.appFiles.assets}, assetsDev );
-  watch({glob: prefixVendor(cfg.vendorFiles.js)}, vendorDev );
+  watch(cfg.app.sass, function(){go('sass', sass)});
+  watch(cfg.app.js, function(){go('js', js)});
+  watch(cfg.app.rootHtml, function(){go('html', html)});
+  watch(cfg.app.tpl, function(){go('templates', templates)});
+  watch(cfg.app.assets, function(){go('assets', assets)});
+  watch(cfg.config, quit);
 });
 
-// VERSIONING
-gulp.task('bump-patch', function () { 
-  return gulp.src(cfg.packageJSON)
-        .pipe(bump({type:'patch'}))
-        .pipe(gulp.dest('./'));
-});
-gulp.task('bump-minor', function () { 
-  return gulp.src(cfg.packageJSON)
-        .pipe(bump({type:'minor'}))
-        .pipe(gulp.dest('./')); 
-});
-gulp.task('bump-major', function () { 
-  return gulp.src(cfg.packageJSON)
-        .pipe(bump({type:'major'}))
-        .pipe(gulp.dest('./')); 
-});
+// Versioning
+gulp.task('bump', doBump);
+gulp.task('bump-patch', function(){ return doBump('patch'); });
+gulp.task('bump-minor', function(){ return doBump('minor'); });
+gulp.task('bump-major', function(){ return doBump('major'); });
 
-// TASKS OF TASKS
-gulp.task('build', ['clean', 'copy-vendor-dev', 'vendor-dev', 'js-dev', 'sass-dev', 'assets-dev', 'root-html-dev']);
+// Metatasks
+gulp.task('build', ['clean', 'html']);
 gulp.task('dev', ['build', 'watch']);
-
-gulp.task('compile', ['clean', 'copy-vendor-dist', 'vendor-dist', 'js-dist', 'sass-dist', 'assets-dist', 'root-html-dist']);
-gulp.task('package', ['clean-dist', 'compile']);
-gulp.task('server', ['clean-dist', 'compile', 'upload']);
-
-// Default Task
+gulp.task('dist', ['production', 'build']);
+gulp.task('server', ['dist', 'upload']);
 gulp.task('default', ['dev']);

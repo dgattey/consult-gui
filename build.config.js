@@ -2,73 +2,67 @@
  * This file/module contains all configuration for the build process.
  */
 module.exports = {
-  /**
-   * The `buildDir` folder is where our projects are compiled during
-   * development and the `distDir` folder is where our app resides once it's
-   * completely built. `vendorDir` is the place where all vendor files reside.
-   * `server' is the location of the server
-   */
-  buildDir: 'build/',
-  distDir: 'dist/',
-  vendorDir: 'bower_components/',
-  server: '',
+  build: 'build/',
+  config: './*.js',
+  production: false,
 
+  // JSON config files
+  pkg: './package.json',
+  bower: './bower.json',
 
-  /**
-   * This is a collection of file patterns that refer to our app code (the
-   * stuff in `src/`). These file paths are used in the configuration of
-   * build tasks. `js` is all project javascript, sass tests. `tpl` contains
-   * our template HTML files. `html` is just our main HTML file, `sass` is
-   * our main stylesheet.
-   */
-  appFiles: {
-    js: [ 'src/**/*.js', '!src/**/*.spec.js', '!src/assets/**/*.js' ],
-    assets: [ 'src/assets/**/*.*', 'src/assets/**/*' ],
-    tpl: [ 'src/app/**/*.tpl.html', 'src/common/**/*.tpl.html' ],
+  // File patterns for app code
+  app: {
+    js: ['src/**/*.js', '!src/assets/**/*.js'],
+    assets: ['src/assets/**/*.*'],
+    tpl: ['src/**/*.tpl.html'],
     rootHtml: 'src/index.html',
-    sass: [ 'src/**/*.scss' ],
-    rootSass: 'src/main.scss'
+    sass: ['src/**/*.scss'],
+    rootSass: 'src/app.scss'
   },
 
-  /**
-   * This is a collection of folders used for building of the app
-   */
-  destDirs: {
+  // Folders to build into
+  dest: {
     js: 'js/',
     css: 'css/',
-    vendor: 'vendor/',
     assets: 'assets/',
-    vendor: 'vendor/'
+    fonts: 'fonts/',
+    prefix: 'preview'
   },
 
-  /**
-   * This is the same as `appFiles`, except it contains patterns that
-   * reference vendor code (`vendor/`) that we need to place into the build
-   * process somewhere. While the `appFiles` property ensures all
-   * standardized files are collected for compilation, it is the user's job
-   * to ensure non-standardized (i.e. vendor-related) files are handled
-   * appropriately in `vendorFiles.js`.
-   */
-  vendorFiles: {
+  // The minimized versions of files
+  min: {
+    js: 'app.min.js',
+    css: 'app.min.css',
+    vendorCSS: 'vendor.css',
+    vendorJS: 'vendor.js',
+    partials: 'partials.min.js'
+  },
+
+  // The files as they exist in the build dir (all globs)
+  compiled: {
+    js: ['/**/*.js', '!/**/vendor.js'],
+    css: ['/**/*.css', '!/**/vendor.css']
+  },
+
+  // Vendor code for build process (Angular + Bootstrap + more)
+  vendor: {
+    src: 'bower_components/',
     js: [
-      'angular/angular.min.js',
-      'angular-bootstrap/ui-bootstrap.min.js',
-      'angular-bootstrap/ui-bootstrap-tpls.min.js',
-      'angular-ui-router/release/angular-ui-router.min.js',
-      'angular-ui-utils/ui-utils.min.js',
-      'angular-sanitize/angular-sanitize.min.js'
+      'angular.min.js',
+      'ui-bootstrap.min.js',
+      'ui-bootstrap-tpls.min.js',
+      'angular-ui-router.min.js',
+      'ui-utils.min.js',
+      'angular-sanitize.min.js'
     ],
     map:[
-      'angular/angular.min.js.map',
-      'angular-sanitize/angular-sanitize.min.js.map'
+      'angular-sanitize.min.js.map',
+      'angular.min.js.map'
     ],
-    css:[
+    css: [
       'bootstrap/dist/css/bootstrap.min.css'
+    ],
+    fonts: [
     ]
-  },
-
-  packageJSON: [
-    './package.json',
-    './bower.json'
-  ]
+  }
 };
