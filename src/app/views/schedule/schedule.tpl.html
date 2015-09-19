@@ -47,7 +47,7 @@
 						<div class="time-block" 
 							ng-repeat="(slot,time) in day.slots" 
 							ng-style="timeBlockStyle(time)"
-							ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected, current: showsCurrent(day, time)}"
+							ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected, current: showsCurrent(day, time), past: showsPast(day, time)}"
 							ng-hide="time.user == 'CLOSED'"
 							ng-click="timeBlockClicked(time.user)"
 							tooltip="{{time.start}} to {{time.end}}"

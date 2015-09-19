@@ -7,6 +7,7 @@ $time_normal: desaturate($color_accent, 10%);
 $time_desaturated: lighten(desaturate($color_accent, 70%), 20%);
 $time_highlighted: lighten($color_accent, 20%);
 $time_current: $color_accent_green;
+$time_subbed: $color_accent_red;
 
 div.schedule {
 	margin-top: $header_size;
@@ -27,8 +28,6 @@ div.schedule {
 			letter-spacing: 0;
 		}
 	}
-
-
 
 	.week-of {
 		display: block;
@@ -112,14 +111,14 @@ div.schedule {
 				letter-spacing: 0.5px;
 				color: $color_text_light;
 			}
-			&.subbed {
-				h5 {
-					color: $color_hover;
-				}
-				background: $time_desaturated;
-			}
 			&.me {
 				background: $time_highlighted;
+			}
+			&.subbed {
+				background: $time_subbed;
+			}
+			&.past {
+				background: $time_desaturated;
 			}
 			&.current {
 				background: $time_current;

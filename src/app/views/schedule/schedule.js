@@ -129,7 +129,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 	// Converts '08:20' to 8.33333
 	var convertStrDate = function(str) {
 		var times = str.split(':');
-		return parseInt(times[0]) + parseInt(times[1]) / 60.0;
+		return parseInt(times[0], 10) + parseInt(times[1], 10) / 60.0;
 	};
 
 	// Whether a given slot should show as current
@@ -138,6 +138,17 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip','stringExtensions']
 			$scope.current.day == day.index &&
 			$scope.current.time >= convertStrDate(time.start) && 
 			$scope.current.time <= convertStrDate(time.end);
+	};
+
+	// Whether a given slot should show as disabled (in the past)
+	$scope.showsPast = function(day, time) {
+		if ($scope.weekOffset === 0) {
+			// Either a past day 
+			return $scope.current.day > day.index ||
+			($scope.current.time > convertStrDate(time.end) && 
+				$scope.current.day == day.index);
+		}
+		return $scope.weekOffset < 0;
 	};
 
 	// Saves data to frontend to visualize
