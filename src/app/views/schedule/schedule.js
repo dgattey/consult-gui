@@ -1,9 +1,12 @@
 angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'])
 .controller('ScheduleCtrl', function ($scope, $rootScope, $http, $q, $timeout, scheduleLoader, StringExtensions) {
 	$rootScope.pageTitle = 'Schedule';
-	$scope.headings = [];
 
-	// Gets the first & last days of the week and saves it
+	/*
+	 * Helper to save the bounds of the current week. From current day and week
+	 * offset, calculates the week's start and end as dates and saves them to 
+	 * $scope. Start is Monday, end is Sunday.
+	 */
 	function saveCurrentWeekBounds() {
 		return $q(function(resolve, reject) {
 			var date = new Date(),
@@ -25,35 +28,17 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 		});
 	}
 
-	// Converts string time to decimal representation: i.e. '08:20' -> 8.33333
-	var timeToDecimal = function(str) {
+	// Helper to convert string time to decimal rep: i.e. '08:20' -> 8.33333
+	function timeToDecimal(str) {
 		var times = str.split(':');
 		return parseInt(times[0], 10) + parseInt(times[1], 10) / 60.0;
-	};
+	}
 
-	// Determines whether a given slot should show as current
-	$scope.showsCurrent = function(day, time) {
-		return $scope.weekOffset === 0 &&
-			$scope.current.day == day.index &&
-			$scope.current.time >= timeToDecimal(time.start) && 
-			$scope.current.time <= timeToDecimal(time.end);
-	};
-
-	// Determines whether a given slot should show as disabled (in the past)
-	$scope.showsPast = function(day, time) {
-		if ($scope.weekOffset === 0) {
-			// Either a past day 
-			return $scope.current.day > day.index ||
-			($scope.current.time > timeToDecimal(time.end) && $scope.current.day == day.index);
-		}
-		return $scope.weekOffset < 0;
-	};
-
-	// Saves data to frontend to visualize
-	function visualize(data) {
-		$scope.maxWeeks = data.meta.weeks;
-		$scope.current = data.current;
-		$scope.shouldHighlight = false;
+	/*
+	 * Saves each shift to a slot in the $scope.days array and sets up 
+	 * data for selected, free, etc.
+	 */
+	function saveShiftsToDays(data) {
 		tmpDays = {};
 
 		// Associates shift times with days
@@ -69,12 +54,11 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			var endTime = val.substring(val.indexOf('-')+1);
 
 			var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
-			var free = data.slots[slot] == 'FREE';
 			daySlots[slot] = {
 				start: startTime,
 				end: endTime,
 				user: data.slots[slot],
-				free: free,
+				free: data.slots[slot] == 'FREE',
 				selected: false
 			};
 			tmpDays[dayName] = {title:dayName, slots:daySlots};
@@ -90,11 +74,20 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			tmpDays.Sat,
 			tmpDays.Sun
 		];
+	}
+
+	/*
+	 * Takes each slot and coalesces it with the one next to it if
+	 * the username matches. Does it once for the next block, then 
+	 * repeats for blocks two away, guaranteeing combination for all
+	 * blocks.
+	 */
+	function coalesceSlots(data) {
 		var i, j;
 		for (i=0; i<$scope.days.length; i++) {
 			var d = $scope.days[i];
 			d.index = i+1;
-			for (slot in d.slots){
+			for (var slot in d.slots){
 				var slotData = d.slots[slot];
 
 				// Coalescing users - next block
@@ -123,8 +116,23 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 				}
 			}
 		}
+	}
 
-		// The default times on the left
+	/*
+	 * Given the data, creates days, blocks, and ordered slots that represent
+	 * all the blocks each day that can be visualized
+	 */
+	function visualize(data) {
+		// Save data to $scope for use later
+		$scope.maxWeeks = data.meta.weeks;
+		$scope.current = data.current;
+		$scope.shouldHighlight = false;
+		
+		// Save the shifts and coalesce the slots to consolidate it
+		saveShiftsToDays(data);
+		coalesceSlots(data);
+
+		// Setup the default times on the left via array
 		$scope.legend = [];
 		var hour;
 		var lastHour = data.current.week < data.meta.weeksToReading ? 26 : 28;
@@ -133,8 +141,39 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 		}
 	}
 
-	// Calculates top positioning of a time block given the time
-	$scope.timeBlockStyle = function(time) {
+	/*
+	 * Determines whether a given slot should show as current. This means
+	 * the current time intersects it (start and end within bounds)
+	 */
+	function shouldShowSlotCurrent(day, time) {
+		return $scope.weekOffset === 0 &&
+			$scope.current.day == day.index &&
+			$scope.current.time >= timeToDecimal(time.start) &&
+			$scope.current.time <= timeToDecimal(time.end);
+	}
+
+	/*
+	 * Determines whether a given slot should show as disabled. This is
+	 * calculated by checking whether the slot is in the past.
+	 */
+	function shouldShowSlotDisabled(day, time) {
+		// This week, so either day is less than current, or end time is before now
+		if ($scope.weekOffset === 0) {
+			var curr = $scope.current;
+			var blockEndsBeforeNow = curr.time > timeToDecimal(time.end) && curr.day == day.index;
+			return $scope.current.day > day.index || blockEndsBeforeNow;
+		}
+		// Prior week?
+		return $scope.weekOffset < 0;
+	}
+
+	/*
+	 * Used to calculate height and top margin for a given time block.
+	 * All values used to calculate are unfortunately magic numbers 
+	 * that have been chosen to make it look right. 48 and 9 have no 
+	 * numerical signficance other than the fact that they look right.
+	 */
+	function calculateBlockStyle(time) {
 		var start, end;
 		if (time) {
 			start = timeToDecimal(time.start);
@@ -154,11 +193,14 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			'height': ''+height+'px',
 			'margin-top': ''+topOffset+'px'
 		};
-	};
+	}
 
-	// Highlights all blocks that are clicked
-	$scope.timeBlockClicked = function(user) {
-		// Go through all blocks and update selected status
+	/*
+	 * Highlights all blocks that belong to a user in response to 
+	 * a click on a given block. Also used to unhighlight if
+	 * clicked again.
+	 */
+	function highlight(user) {
 		var oldUser = '';
 		var updateSlot = function(slot, id) {
 			if (slot.selected) {
@@ -167,30 +209,45 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			// If the old selected was the same, then deselect
 			slot.selected = slot.user == user && oldUser != slot.user;
 		};
+		// Go through all blocks and update selected status
 		for (var i=0; i<$scope.days.length; i++) {
 			angular.forEach($scope.days[i].slots, updateSlot);
 		}
 		$scope.shouldHighlight = oldUser != user; // only when old selected was different
-	};
+	}
 
-	/* Do all the things! 
-	 * 1. Load non-changing data first - meta and perm
-	 * 2. Parse the current date
-	 * 3. Load the current week
-	 * 4. Save to $scope the data for the current week + perm combined
+	/*
+	 * Handles visualization errors by deleting $scoped data and
+	 * printing the error for the user
+	 */
+	function errorHandler(error) {
+		$scope.days = undefined;
+		$scope.slots = undefined;
+		$scope.shifts = undefined;
+		console.error(error);
+	}
+
+	/*
+	 * Exposes functions to $scope that are previously defined. Also
+	 * sets up constants for the frontend.
+	 */
+	$scope.weekOffset = 0;
+	$scope.headings = [];
+	$scope.showsCurrent = shouldShowSlotCurrent;
+	$scope.showsPast = shouldShowSlotDisabled;
+	$scope.blockStyle = calculateBlockStyle;
+	$scope.highlight = highlight;
+
+	/*
+	 * When week offset changes, save the bounds, load the 
+	 * week in via scheduleLoader, and visualize it
 	 */
 	$scope.$watch(function(scope) {
-		return scope.weekOffset; 
+		return scope.weekOffset;
 	}, function() {
 		saveCurrentWeekBounds()
 		.then(scheduleLoader.loadWeek)
-		.then(visualize, function(error){
-			$scope.days = undefined;
-			$scope.slots = undefined;
-			$scope.shifts = undefined;
-			console.log(error);
-		});
+		.then(visualize, errorHandler);
 	});
-	$scope.weekOffset = 0;
 
 });
