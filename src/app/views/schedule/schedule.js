@@ -73,7 +73,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			daySlots[slot] = {
 				start: startTime,
 				end: endTime,
-				user: free ? 'Needs sub!' : data.slots[slot],
+				user: data.slots[slot],
 				free: free,
 				selected: false
 			};
@@ -85,10 +85,10 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			tmpDays.Mon,
 			tmpDays.Tue,
 			tmpDays.Wed,
-				tmpDays.Thu,
-				tmpDays.Fri,
-					tmpDays.Sat,
-					tmpDays.Sun
+			tmpDays.Thu,
+			tmpDays.Fri,
+			tmpDays.Sat,
+			tmpDays.Sun
 		];
 		var i, j;
 		for (i=0; i<$scope.days.length; i++) {
@@ -137,10 +137,8 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 	$scope.timeBlockStyle = function(time) {
 		var start, end;
 		if (time) {
-			var splitStart = time.start.split(':');
-			var splitEnd = time.end.split(':');
-			start = parseInt(splitStart[0], 10)+(parseInt(splitStart[1], 10)/60.0);
-			end = parseInt(splitEnd[0], 10)+(parseInt(splitEnd[1], 10)/60.0);
+			start = timeToDecimal(time.start);
+			end = timeToDecimal(time.end);
 		}
 		else {
 			var now = new Date();
@@ -175,14 +173,15 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 		$scope.shouldHighlight = oldUser != user; // only when old selected was different
 	};
 
-
 	/* Do all the things! 
 	 * 1. Load non-changing data first - meta and perm
 	 * 2. Parse the current date
 	 * 3. Load the current week
 	 * 4. Save to $scope the data for the current week + perm combined
 	 */
-	var create = function() {
+	$scope.$watch(function(scope) {
+		return scope.weekOffset; 
+	}, function() {
 		saveCurrentWeekBounds()
 		.then(scheduleLoader.loadWeek)
 		.then(visualize, function(error){
@@ -191,12 +190,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			$scope.shifts = undefined;
 			console.log(error);
 		});
-	};
-
-	// When changed in HTML, will recreate all stuff
-	$scope.$watch(function(scope) { 
-		return scope.weekOffset; 
-	}, create);
+	});
 	$scope.weekOffset = 0;
 
 });

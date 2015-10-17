@@ -34,7 +34,7 @@
 			<div class="col-sm-11 col-xs-12 days">
 				<!-- Shows line at current time -->
 				<div class="hidden-xs" id="currTime"
-					ng-show="days && shouldShow" 
+					ng-show="days" 
 					ng-style="timeBlockStyle()">
 					<hr>
 				</div>
@@ -45,7 +45,7 @@
 					id="{{day.title}}">
 					<h4>{{day.title}}</h4>
 					<div class="time-blocks">
-						
+
 						<!-- Each of the blocks for the given day -->
 						<div class="time-block" 
 							ng-repeat="(slot,time) in day.slots" 
@@ -57,7 +57,7 @@
 							tooltip-trigger 
 							tooltip-animation="true" 
 							tooltip-placement="top">
-							<h5>{{time.user}}
+							<h5>{{time.user == 'FREE' ? 'Needs sub!' : time.user}}
 								<!-- <span ng-show="showsCurrent(day, time)">(Current)</span> -->
 								<!-- <span ng-show="time.user==cslogin">(Me)</span> -->
 								<span class="visible-xs hidden-sm hidden-md hidden-lg time"> {{time.start}} - {{time.end}}</span>

@@ -1,7 +1,7 @@
 angular.module('app.modules.scheduleLoader', ['stringExtensions'])
 .service('scheduleLoader', function($q, $http, StringExtensions) {
   // Location where the schedule assets are held, relative to top level directory
-  var fileLoc = 'assets/schedule/sunlab/sched';
+  var schedDir = 'assets/schedule/sunlab/sched';
 
   /*
    * Saves raw, newline delimited slot data to dest. Data appears in (id, info) 
@@ -48,13 +48,14 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * and returning a promise to wrap it all up.
    * 
    * data: object representing data passed through all functions
-   * file: location in filesystem to load
    * dest: where to save the slot data to
+   * file: location in filesystem to load
    * func: the function to use to save the data (if not specified, uses saveSlotData)
    */
-  function saveFromFile(data, file, dest, func) {
+  function saveFromFile(data, dest, file, func) {
+    var loc = file ? schedDir + file : schedDir;
     return $q(function(resolve, reject) {
-      $http.get(file).success(function(raw) {
+      $http.get(loc).success(function(raw) {
         if (!func) {
           func = saveSlotData;
         }
@@ -69,22 +70,22 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
 
   // Loads all the metadata from file to the meta object
   function readMetadata(data) {
-    return saveFromFile(data, fileLoc + '.meta', data.meta, saveMetaData);
+    return saveFromFile(data, data.meta, '.meta', saveMetaData);
   }
 
   // Loads in translation of id -> shift times to data.shifts
   function translateShifts(data) {
-    return saveFromFile(data, fileLoc + '.shifttimes', data.shifts);
+    return saveFromFile(data, data.shifts, '.shifttimes');
   }
 
   // Loads in the permanent schedule to data.slots
   function readPermanentSchedule(data) {
-    return saveFromFile(data, fileLoc, data.slots);
+    return saveFromFile(data, data.slots);
   }
 
   // Loads in the current week's schedule to data.slots
   function readWeekSchedule(data) {
-    return saveFromFile(data, fileLoc + '.week.' + data.current.week, data.slots);
+    return saveFromFile(data, data.slots, '.week.' + data.current.week);
   }
 
   /*
@@ -109,9 +110,27 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
   }
 
   /*
-   * PUBLIC FUNCTION
+   * Loops through the slots and deletes anything that isn't free. Pretty simple
+   * but it assumes all slots already exist.
+   */
+  function filterForFree(data) {
+    return $q(function(resolve, reject) {
+      for (var slot in data.slots) {
+        if (data.slots[slot] == 'FREE') continue;
+        else delete data.slots[slot];
+      }
+      resolve(data);
+    });
+  }
+
+  /* PUBLIC 
+   * Methods exposed to any users of this module
+   */
+
+  /*
    * Loads in metadata, the translation of id -> shift times, the permanent
-   * schedule, the current week's schedule based on weekOffset, and 
+   * schedule, the current week's schedule based on weekOffset, and returns
+   * the data via promise
    */
   this.loadWeek = function(weekOffset) {
     var data = {meta: {}, slots: {}, shifts: {}, current: {}};
@@ -122,5 +141,21 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
       return setCurrent(data, weekOffset);
     })
     .then(readWeekSchedule);
+  };
+
+  /*
+   * Loads in metadata, the translation of id -> shift times, the current week's 
+   * schedule based on weekOffset (but not the perm schedule), and returns
+   * the data via promise
+   */
+  this.loadFree = function(weekOffset) {
+    var data = {meta: {}, slots: {}, shifts: {}, current: {}};
+    return readMetadata(data)
+    .then(translateShifts)
+    .then(function(data) {
+      return setCurrent(data, weekOffset);
+    })
+    .then(readWeekSchedule)
+    .then(filterForFree);
   };
 });
