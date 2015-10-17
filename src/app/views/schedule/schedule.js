@@ -2,6 +2,12 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 .controller('ScheduleCtrl', function ($scope, $rootScope, $http, $q, $timeout, scheduleLoader, StringExtensions) {
 	$rootScope.pageTitle = 'Schedule';
 
+	// Helper to convert string time to decimal rep: i.e. '08:20' -> 8.33333
+	function timeToDecimal(str) {
+		var times = str.split(':');
+		return parseInt(times[0], 10) + parseInt(times[1], 10) / 60.0;
+	}
+
 	/*
 	 * Helper to save the bounds of the current week. From current day and week
 	 * offset, calculates the week's start and end as dates and saves them to 
@@ -28,111 +34,20 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 		});
 	}
 
-	// Helper to convert string time to decimal rep: i.e. '08:20' -> 8.33333
-	function timeToDecimal(str) {
-		var times = str.split(':');
-		return parseInt(times[0], 10) + parseInt(times[1], 10) / 60.0;
-	}
-
-	/*
-	 * Saves each shift to a slot in the $scope.days array and sets up 
-	 * data for selected, free, etc.
-	 */
-	function saveShiftsToDays(data) {
-		tmpDays = {};
-
-		// Associates shift times with days
-		for (var slot in data.shifts) {
-			// Only include r and s slots if we're in reading period
-			if (slot.indexOf('r') > -1 || slot.indexOf('s') > -1) {
-				if (data.current.week < data.meta.weeksToReading) continue;
-			}
-
-			var val = data.shifts[slot];
-			var dayName = val.substring(0, val.indexOf(' '));
-			var startTime = val.substring(StringExtensions.nthOccurrence(val, ' ', 1)+1, val.indexOf('-'));
-			var endTime = val.substring(val.indexOf('-')+1);
-
-			var daySlots = tmpDays[dayName] ? tmpDays[dayName].slots : {};
-			daySlots[slot] = {
-				start: startTime,
-				end: endTime,
-				user: data.slots[slot],
-				free: data.slots[slot] == 'FREE',
-				selected: false
-			};
-			tmpDays[dayName] = {title:dayName, slots:daySlots};
-		}
-
-		// Order it and save it to frontend
-		$scope.days = [
-			tmpDays.Mon,
-			tmpDays.Tue,
-			tmpDays.Wed,
-			tmpDays.Thu,
-			tmpDays.Fri,
-			tmpDays.Sat,
-			tmpDays.Sun
-		];
-	}
-
-	/*
-	 * Takes each slot and coalesces it with the one next to it if
-	 * the username matches. Does it once for the next block, then 
-	 * repeats for blocks two away, guaranteeing combination for all
-	 * blocks.
-	 */
-	function coalesceSlots(data) {
-		var i, j;
-		for (i=0; i<$scope.days.length; i++) {
-			var d = $scope.days[i];
-			d.index = i+1;
-			for (var slot in d.slots){
-				var slotData = d.slots[slot];
-
-				// Coalescing users - next block
-				var tmp = slot;
-				var origSlotChar = slot.charCodeAt(0);
-				var nextSlot = String.fromCharCode(origSlotChar+1) + slot.charAt(1);
-				while (d.slots[nextSlot] &&
-						d.slots[nextSlot].user == slotData.user &&
-						d.slots[nextSlot].start == slotData.end) {
-					d.slots[nextSlot].start = slotData.start;
-					delete d.slots[tmp];
-					tmp = nextSlot;
-					nextSlot = String.fromCharCode(nextSlot.charCodeAt(0)+1)+slot.charAt(1);
-				}
-
-				// Coalescing users - two blocks away
-				tmp = slot;
-				nextSlot = String.fromCharCode(origSlotChar+2) + slot.charAt(1);
-				while (d.slots[nextSlot] &&
-						d.slots[nextSlot].user == slotData.user &&
-						d.slots[nextSlot].start == slotData.end) {
-					d.slots[nextSlot].start = slotData.start;
-					delete d.slots[tmp];
-					tmp = nextSlot;
-					nextSlot = String.fromCharCode(nextSlot.charCodeAt(0)+2)+slot.charAt(1);
-				}
-			}
-		}
-	}
-
 	/*
 	 * Given the data, creates days, blocks, and ordered slots that represent
 	 * all the blocks each day that can be visualized
 	 */
 	function visualize(data) {
-		// Save data to $scope for use later
+		// Save metadata to $scope for use later
 		$scope.maxWeeks = data.meta.weeks;
 		$scope.current = data.current;
 		$scope.shouldHighlight = false;
 		
-		// Save the shifts and coalesce the slots to consolidate it
-		saveShiftsToDays(data);
-		coalesceSlots(data);
+		// Generate the days array with slots associated with times
+		$scope.days = scheduleLoader.slotsToDays(data);
 
-		// Setup the default times on the left via array
+		// Setup the default times for the legend on the left
 		$scope.legend = [];
 		var hour;
 		var lastHour = data.current.week < data.meta.weeksToReading ? 26 : 28;
@@ -224,7 +139,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 		$scope.days = undefined;
 		$scope.slots = undefined;
 		$scope.shifts = undefined;
-		console.error(error);
+		console.log(error);
 	}
 
 	/*

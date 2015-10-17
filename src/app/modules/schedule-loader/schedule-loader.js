@@ -123,6 +123,43 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
     });
   }
 
+  /*
+   * Gets the next slot from the current slot text. Slots are represented
+   * represented as letter + number, where the letter is an hour of the day
+   * and day is a day of the week (1 through 7).
+   */
+  function nextSlot(slot) {
+    var hour = slot.charCodeAt(0);
+    var day = slot.charCodeAt(1);
+    return String.fromCharCode(hour + 1, day);
+  }
+
+  /*
+   * Takes each slot and coalesces it with the one next to it if
+   * the username matches. Does it once for the next block, then 
+   * repeats for blocks two away, guaranteeing combination for all
+   * blocks.
+   */
+  function coalesceSlots(days) {
+    for (var i = 0; i < days.length; i++) {
+      var d = days[i];
+
+      // For each slot, if it is the same user as the next one and
+      // the times for start and end match, then combine them into one
+      for (var idCurr in d.slots){
+        var idNext = nextSlot(idCurr);
+        var curr = d.slots[idCurr];
+        var next = d.slots[idNext];
+        while (next && next.user == curr.user && next.start == curr.end) {
+          next.start = curr.start;
+          delete d.slots[idCurr];
+          idCurr = idNext;
+          idNext = nextSlot(idNext);
+        }
+      }
+    }
+  }
+
   /* PUBLIC 
    * Methods exposed to any users of this module
    */
@@ -157,5 +194,49 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
     })
     .then(readWeekSchedule)
     .then(filterForFree);
+  };
+
+  /*
+   * Saves each shift to a slot in the days array and sets up 
+   * data for selected, free, etc. for each slot. At end, we
+   * will have a 0-6 days array, with an object for title, slots,
+   * and index for each. Also coalesces adjacent slots so users
+   * have long blocks rather than hour long blocks.
+   */
+  this.slotsToDays = function(data) {
+    // Initializing days array
+    days = [];
+    for (var i = 6; i >= 0; i--) {
+      days[i] = {title: '', slots: {}, index: i+1}; // title will be corrected later
+    }
+
+    // Associates shift times with days
+    for (var slot in data.shifts) {
+      // Only include r and s slots if we're in reading period
+      if (slot.indexOf('r') > -1 || slot.indexOf('s') > -1) {
+        if (data.current.week < data.meta.weeksToReading) continue;
+      }
+
+      // Parse text data from shifts
+      var text = data.shifts[slot];
+      var dayName = text.substring(0, text.indexOf(' '));
+      var startTime = text.substring(StringExtensions.nthOccurrence(text, ' ', 1)+1, text.indexOf('-'));
+      var endTime = text.substring(text.indexOf('-')+1);
+      
+      // Update slots and title
+      i = slot.substring(1, 2) - 1; //since it's 1 indexed
+      days[i].slots[slot] = {
+        start: startTime,
+        end: endTime,
+        user: data.slots[slot],
+        free: data.slots[slot] == 'FREE',
+        selected: false
+      };
+      days[i].title = dayName;
+    }
+
+    // Combine adjacent slots that are the same user and return days
+    coalesceSlots(days);
+    return days;
   };
 });
