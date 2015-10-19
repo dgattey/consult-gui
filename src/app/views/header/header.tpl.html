@@ -40,7 +40,7 @@
       <div class="row">
         <div class="col-xs-12">
           <p class="login">Logged in as {{cslogin}}</p>
-          <p class="shifts">{{curr}} is currently on shift and {{next}} is up next</p>
+          <p class="shifts">{{curr}} is currently on shift <span ng-if="next">and {{next}} is up next</span><span ng-if="!next">and the Sunlab closes after that</span></p>
         </div>
       </div>
     </div>

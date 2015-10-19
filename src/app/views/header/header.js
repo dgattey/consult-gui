@@ -1,5 +1,5 @@
 angular.module('app.views.header', [])
-.controller('HeaderCtrl', function($scope, $rootScope, $q, scheduleLoader){
+.controller('HeaderCtrl', function($scope, $rootScope, $q, $timeout, scheduleLoader){
 	$scope.isCollapsed = true;
 	$scope.navigation = [
 		{ state:'home', title: 'Home' },
@@ -7,7 +7,6 @@ angular.module('app.views.header', [])
 		{ state:'sub', title: 'Sub' },
 		{ state:'people', title: 'People' }
 	];
-	var intervalId;
 
 	// Helper to convert string time to decimal rep: i.e. '08:20' -> 8.33333
 	function timeToDecimal(str) {
@@ -16,7 +15,6 @@ angular.module('app.views.header', [])
 	}
 
 	function setStatus(data) {
-		// Reset
 		var curr, next;
 
 		// Loop through this week's slots and get the current person
@@ -28,38 +26,22 @@ angular.module('app.views.header', [])
 				data.current.time <= timeToDecimal(slot.end)) {
 				curr = slot.free ? 'FREE' : slot.user;
 			}
-			// We know it's ordered, so this will be the next one
+			// If there's another slot and it's not free, then use it
 			else if (curr && !slot.free) {
 				next = slot.user;
 				break;
 			}
 		}
-
-		// Tomorrow is the next one
-		if (!next && data.current.day < 7) {
-			slots = days[data.current.day].slots;
-			for (id in slots) {
-				var nextSlot = slots[id];
-				if (!nextSlot.free) {
-					next = nextSlot;
-					break;
-				}
-			}
-			
-		}
-
-		// TODO: Next week is the next person (not handled currently)
 		
 		// Actually apply changes
 		$scope.next = next;
 		$scope.curr = curr;
 
 		// Set status at the next hour
-		if (intervalId) clearInterval(intervalId);
 		var d = new Date();
 		var secondsPastHour = d.getMinutes()*60 + d.getSeconds();
-		intervalId = setInterval(setStatus, 60*60*1000 - secondsPastHour*1000 );
-		console.log($scope.next, $scope.curr);
+		var interval = 60*60*1000 - secondsPastHour*1000;
+		$timeout(setStatus, interval, true, data);
 	}
 
 	/*
