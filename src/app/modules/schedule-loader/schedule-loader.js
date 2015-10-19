@@ -120,6 +120,7 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * data. Will reject the promise if the week is invalid.
    */
   function setCurrent(data, weekOffset) {
+    if (!weekOffset) weekOffset = 0;
     return $q(function(resolve, reject) {
       var now = new Date();
       var diff = now.getTime() - data.meta.startDate.getTime();
@@ -194,10 +195,19 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * Sets up the data object, and reads in metadata and shifttimes to the
    * array. Sets up the object for future calls to load in files
    */
-  function initializeShifts() {
-    var data = {meta: {}, slots: {}, shifts: {}, current: {}};
-    return readMetadata(data)
-    .then(translateShifts);
+  function initializeShifts(meta, shifts, current) {
+    var data = {
+      meta: meta ? meta: {},
+      shifts: shifts ? shifts : {},
+      current: current ? current : {},
+      slots: {}
+    };
+    var noopPromise = $q(function(resolve, reject){
+      resolve(data);
+    });
+    return (meta ? noopPromise : readMetadata(data))
+    .then(shifts ? noopPromise : translateShifts)
+    .then(current ? noopPromise : setCurrent);
   }
 
   /* PUBLIC 
@@ -225,8 +235,8 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * perm schedule), deletes all non-free spots, and returns the data 
    * via promise. 
    */
-  this.loadFree = function(weekOffset) {
-    return initializeShifts()
+  this.loadFree = function(weekOffset, meta, shifts, current) {
+    return initializeShifts(meta, shifts, current)
     .then(function(data) {
       return setCurrent(data, weekOffset);
     })

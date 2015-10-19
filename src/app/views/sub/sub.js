@@ -2,12 +2,6 @@ angular.module('app.views.sub', [])
 .controller('SubCtrl', function ($scope, $rootScope, scheduleLoader) {
 	$rootScope.pageTitle = 'Sub';
 
-	// Helper to convert string time to decimal rep: i.e. '08:20' -> 8.33333
-	// function timeToDecimal(str) {
-	// 	var times = str.split(':');
-	// 	return parseInt(times[0], 10) + parseInt(times[1], 10) / 60.0;
-	// }
-
 	/*
 	 * Helper to save the bounds of the current week. From current day and week
 	 * offset, calculates the week's start and end as dates and saves them to 
@@ -24,12 +18,11 @@ angular.module('app.views.sub', [])
 		return date;
 	}
 
-	// weekStart is date, dayNum is 1-7 for day after
-	$scope.calculateDate = function(weekStart, dayNum) {
+	// weekStart is date, dayOffset is 1-7 for day after
+	$scope.calculateDate = function(weekStart, dayOffset) {
 		var date = new Date(weekStart);
-		var diff = date.getDate() + parseInt(dayNum);
-		console.log(diff);
-		date.setDate(diff);
+		var day = date.getDate() + parseInt(dayOffset, 10);
+		date.setDate(day);
 		return date;
 	};
 
@@ -40,20 +33,16 @@ angular.module('app.views.sub', [])
 		var days = scheduleLoader.slotsToDays(data);
 		monday = calculateMonday(data.meta.startDate, data.current.week);
 		$scope.freeSlots[data.current.week] = {date: monday, days:days};
-
 	}
 
 	function loadAllWeeks(data) {
-		var minWeek = 1;
-		var maxWeek = data.meta.weeks;
+		var minWeek = 0;
+		var maxWeek = data.meta.weeks - data.current.week;
 
 		// Initializing the frontend data
 		$scope.freeSlots = {};
-
-		// TODO: only load from current week to end
-		// TODO: make loadFree not load metadata somehow
 		for (i = minWeek; i <= maxWeek; i++) {
-			scheduleLoader.loadFree(i)
+			scheduleLoader.loadFree(i, data.meta, data.shifts)
 			.then(saveWeek);
 		}
 	}

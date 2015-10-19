@@ -1,12 +1,17 @@
 <div class="sub container" ng-controller="SubCtrl">
 	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>
-	<div ng-repeat="week in freeSlots">
-		<h1>Week of {{week.date | date}}</h1>
+	<div ng-repeat="week in freeSlots" class="row">
+		<div class="col-xs-12">
+			<h2 class="week-of-title">Week of {{week.date | date : 'shortDate'}}</h2>
+		</div>
 		<div ng-repeat="(weekday, day) in week.days">
-			<h3>{{calculateDate(week.date, weekday) | date : 'shortDate'}}</h3>
-			<div ng-repeat="slot in day.slots" ng-show="slot.free">
-				{{slot.start}} - {{slot.end}}
+			<div ng-repeat="slot in day.slots" class="col-lg-4 col-md-6 col-xs-12">
+				<div class="slot">
+					<h3>{{calculateDate(week.date, weekday) | date : 'EEEE MMM d, yyyy'}}</h3>
+					<h4>{{slot.start}} - {{slot.end}}</h4>
+				</div>
 			</div>
+		</div>
 		</div>
 	</div>
 </div>
