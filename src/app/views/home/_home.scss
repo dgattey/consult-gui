@@ -8,24 +8,20 @@ div.home-page {
  	padding: 30px 0;
 
  	.home-item {
- 		&:nth-child(3n) .page-heading-title {
-			background-blend-mode: lighten;
-			background-repeat: repeat-x;
- 			background-position: 300px -300px;
-			background-color: hsl(323, 48%, 36%);
- 		}
- 		&:nth-child(2n) .page-heading-title {
-			background-blend-mode: exclusion;
-			background-repeat: repeat-x;
- 			background-position: 100px -200px;
-			background-color: hsl(179, 100%, 67%);
- 		}
  		&:hover {
- 			opacity: 0.85;
+ 			// opacity: 0.85;
  		}
  		a {
+			text-decoration: none;
  			padding: 25px 60px;
 			&:hover {
+				&.green {
+	 				@include card(hsl(179, 100%, 50%));
+	 			}
+	 			&.pink {
+	 				@include card(hsl(400, 50%, 30%));
+	 			}
+	 			@include card($color_accent);
 				text-decoration: none;
 			}
  		}

@@ -4,8 +4,10 @@
  * to be included in the main app scss file
  */
 
-.pad-body {
-	padding: 50px 0;
+@mixin transform($transform) {
+	transform: $transform;
+	-webkit-transform: $transform;
+	-moz-transform: $transform;
 }
 
 @mixin border-radius($radius) {
@@ -19,4 +21,20 @@
 	-webkit-box-shadow: $shadow;
 	-moz-box-shadow: $shadow;
 	box-shadow: $shadow;
+}
+
+@mixin card($bgcolor) {
+	background-color: $bgcolor;
+	transition: 0.3s all;
+	cursor: pointer;
+
+	&:hover {
+		background-color: darken($bgcolor, 10%);
+		box-shadow: 0 2px 5px $color_text_mute;
+		@include transform(translateY(-2px));
+	}
+
+	&:focus, &:active {
+		background-color: darken($bgcolor, 15%);
+	}
 }

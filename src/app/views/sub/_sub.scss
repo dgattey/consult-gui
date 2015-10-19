@@ -12,24 +12,26 @@ div.sub {
 		color: $color_text_gray;
 	}
 
+	.welcome {
+		font-size: 1.15em;
+		line-height: 1.75em;
+		margin-bottom: 2em;
+	}
+
 	.slot {
 		padding: 10px;
 		padding-top: 1px;
-		margin-bottom: 30px;
-		background: $color_accent;
-		transition: 0.3s background;
-		cursor: pointer;
-
-		&:hover {
-			background: $color_accent_green;
+		margin-bottom: 30px;	
+		.time {
+			color: $color_text_mute;
 		}
-
-		h3 {
+		h1,h2,h3,h4,h5,h6 {
 			color: $color_text_light;
 		}
-	
-		h4 {
-			color: $color_text_mute;
+
+		@include card($color_accent);
+		&.mine {
+			@include card(darken($color_accent_green, 10%));
 		}
 	}
 }

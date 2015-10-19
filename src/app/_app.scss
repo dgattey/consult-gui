@@ -41,11 +41,27 @@ h1 {
 	background-size: cover;
 	padding: 40px 60px;
 	background-color: $color_accent;
+	&.green {
+		background-blend-mode: exclusion;
+		background-repeat: repeat-x;
+		background-position: 100px -200px;
+		background-color: hsl(179, 100%, 50%);
+	}
+	&.pink {
+		background-blend-mode: lighten;
+		background-repeat: repeat-x;
+		background-position: 300px -300px;
+		background-color: hsl(400, 50%, 30%);
+	}
 	margin-bottom: 20px;
 	display: block;
 	h1, h2, h3, h4, h5, h6, & {
 		color: $color_text_light;
 	}
+}
+
+.pad-body {
+	padding: 50px 0;
 }
 
 @media screen and (max-width: 767px) {
