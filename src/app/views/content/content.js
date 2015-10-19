@@ -1,7 +1,7 @@
 angular.module('app.views.content', [])
   .controller('AppCtrl', function($scope, $rootScope) {
 		$scope.appName = 'Consult';
-		$scope.cslogin = 'dgattey'; //TODO: Load in from login
+		$rootScope.cslogin = 'dgattey'; //TODO: Load in from login
 
 		// Initializing the search results array with common shortcuts
 		$rootScope.searchResults = [

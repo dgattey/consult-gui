@@ -1,4 +1,12 @@
 angular.module('app.views.sub', [])
+.filter('free', function($rootScope) {
+	return function(shifts) {
+		for (var id in shifts) {
+			if (!shifts[id].free && shifts[id].user != $rootScope.cslogin) delete shifts[id];
+		}
+		return shifts;
+	};
+})
 .controller('SubCtrl', function ($scope, $rootScope, scheduleLoader) {
 	$rootScope.pageTitle = 'Sub';
 
@@ -35,10 +43,18 @@ angular.module('app.views.sub', [])
 	 * changed. Oh well.
 	 */
 	function saveWeek(data) {
+		// Keep a count of the free and me slots for this week
+		var freeCount = 0;
+		var meCount = 0;
+		for (var slot in data.slots) {
+			if (data.slots[slot] == 'FREE') freeCount++;
+			if (data.slots[slot] == $rootScope.cslogin) meCount++;
+		}
+
+		// Save the days object
 		var days = scheduleLoader.slotsToDays(data);
-		monday = calculateMonday(data.meta.startDate, data.current.week);
-		if (!$scope.freeSlots) $scope.freeSlots = {};
-		$scope.freeSlots[data.current.week] = {date: monday, days:days};
+		weekStart = calculateMonday(data.meta.startDate, data.current.week);
+		$scope.slots[data.current.week] = {date:weekStart, days:days, free:freeCount, me:meCount};
 	}
 
 	/*
@@ -51,9 +67,26 @@ angular.module('app.views.sub', [])
 		var minWeek = 0;
 		var maxWeek = data.meta.weeks - data.current.week;
 		for (i = minWeek; i <= maxWeek; i++) {
-			scheduleLoader.loadFree(i, data.meta, data.shifts)
+			var perm = angular.fromJson(angular.toJson(data.slots, true));
+			scheduleLoader.loadWeek(i, data.meta, data.shifts, perm)
 			.then(saveWeek);
 		}
+	}
+
+	$scope.freeCount = function(slots) {
+		var count = 0;
+		for (var id in slots) {
+			count += slots[id].free;
+		}
+		return count;
+	}
+
+	$scope.meCount = function(slots) {
+		var count = 0;
+		for (var id in slots) {
+			count += slots[id].me;
+		}
+		return count;
 	}
 
 	/*
@@ -62,6 +95,7 @@ angular.module('app.views.sub', [])
 	 * filtered on the frontend to only show free slots or only show own
 	 * slots.
 	 */
+	$scope.slots = {};
 	$scope.calculateDate = calculateDate;
 	scheduleLoader.initializeShifts()
 	.then(loadAllWeeks);

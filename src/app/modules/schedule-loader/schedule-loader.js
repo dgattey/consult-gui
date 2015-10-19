@@ -178,19 +178,20 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * Sets up the data object, and reads in metadata and shifttimes to the
    * array. Sets up the object for future calls to load in files
    */
-  function initializeShifts(meta, shifts, current) {
+  function initializeShifts(meta, shifts, perm) {
     var data = {
       meta: meta ? meta: {},
       shifts: shifts ? shifts : {},
-      current: current ? current : {},
-      slots: {}
+      current: {},
+      slots: perm ? perm : {}
     };
     var noopPromise = $q(function(resolve, reject){
       resolve(data);
     });
     return (meta ? noopPromise : readMetadata(data))
     .then(shifts ? noopPromise : translateShifts)
-    .then(current ? noopPromise : setCurrent);
+    .then(setCurrent)
+    .then(perm ? noopPromise : readPermanentSchedule);
   }
 
   /*
@@ -223,27 +224,12 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * schedule, the current week's schedule based on weekOffset, and returns
    * the data via promise
    */
-  this.loadWeek = function(weekOffset, meta, shifts, current) {
-    return initializeShifts(meta, shifts, current)
-    .then(readPermanentSchedule)
+  this.loadWeek = function(weekOffset, meta, shifts, perm) {
+    return initializeShifts(meta, shifts, perm)
     .then(function(data) {
       return setCurrent(data, weekOffset);
     })
     .then(readWeekSchedule);
-  };
-
-  /*
-   * Loads the current week's schedule based on offset (but not the 
-   * perm schedule), deletes all non-free spots, and returns the data 
-   * via promise. 
-   */
-  this.loadFree = function(weekOffset, meta, shifts, current) {
-    return initializeShifts(meta, shifts, current)
-    .then(function(data) {
-      return setCurrent(data, weekOffset);
-    })
-    .then(readWeekSchedule)
-    .then(filter);
   };
 
   /*
