@@ -73,18 +73,14 @@ angular.module('app.views.sub', [])
 		}
 	}
 
-	$scope.freeCount = function(slots) {
+	/*
+	 * Loops through slots and checks for count of user where user is
+	 * 'free' or 'me' (precalculated in saveWeek).
+	 */
+	function countOccurrencesOfUser(slots, user) {
 		var count = 0;
 		for (var id in slots) {
-			count += slots[id].free;
-		}
-		return count;
-	}
-
-	$scope.meCount = function(slots) {
-		var count = 0;
-		for (var id in slots) {
-			count += slots[id].me;
+			count += slots[id][user];
 		}
 		return count;
 	}
@@ -97,6 +93,13 @@ angular.module('app.views.sub', [])
 	 */
 	$scope.slots = {};
 	$scope.calculateDate = calculateDate;
+	$scope.freeCount = function(slots) {
+		return countOccurrencesOfUser(slots, 'free');
+	};
+
+	$scope.meCount = function(slots) {
+		return countOccurrencesOfUser(slots, 'me');
+	};
 	scheduleLoader.initializeShifts()
 	.then(loadAllWeeks);
 

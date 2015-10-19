@@ -4,9 +4,9 @@
  */
 
 $time_normal: desaturate($color_accent, 10%);
-$time_desaturated: lighten(desaturate($color_accent, 70%), 20%);
+$time_desaturated: lighten(desaturate($color_accent, 70%), 50%);
 $time_highlighted: lighten($color_accent, 20%);
-$time_current: $color_accent_green;
+$time_current: $color_bg_green;
 $time_subbed: $color_accent_red;
 
 div.schedule {
@@ -135,6 +135,7 @@ div.schedule {
 				background: $time_subbed;
 			}
 			&.past {
+				color: $color_text_mute;
 				background: $time_desaturated;
 			}
 			&.current {

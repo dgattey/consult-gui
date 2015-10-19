@@ -1,11 +1,14 @@
 <div class="sub container-fluid page" ng-controller="SubCtrl">
 	<h1 class="page-heading-title green">
 		<div class="container">
-			<div class="col-lg-7">
-				Free Shifts
-			</div>
-			<div class="col-lg-5">
-				My Shifts
+			<div class="row">
+				<div class="col-lg-7 col-xs-12">
+					<span class="hidden-md hidden-sm hidden-xs">Free Shifts</span>
+					<span class="hidden-lg">Sub</span>
+				</div>
+				<div class="col-lg-5 col-xs-12 hidden-md hidden-sm hidden-xs visible-lg-block">
+					My Shifts
+				</div>
 			</div>
 		</div>
 	</h1>
@@ -38,7 +41,7 @@
 			<div class="col-xs-12 col-lg-5">
 				<!-- Your shifts -->
 				<div class="row">
-					<p ng-show="meCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Need to sub out your own slots? This is everything you're signed up for today and beyond.</p>
+					<p ng-show="meCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Need to sub out your own slots? This is everything you're signed up for today and beyond:</p>
 					<p ng-show="meCount(slots) == 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Looks like you have no slots beyond today, so there's nothing you can sub out!</p>
 				</div>
 
