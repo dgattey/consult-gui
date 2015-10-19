@@ -3,6 +3,15 @@
  * This file contains styles specific to the content template of the app
  */
 
-div.content-page {
+#content {
+	min-height: 100%;
+    height: auto !important;
+    margin-bottom: 0 - $footer_height;
  	background-color: $color_bg;
+}
+#footer {
+	height: $footer_height; 
+}
+html, body {
+  height: calc(100% - 16px);
 }

@@ -1,7 +1,13 @@
-<div class="people container" ng-controller="PeopleCtrl">
-	<h1 class="page-heading-title col-xs-12">{{pageTitle}}</h1>
-	<div class="col-sm-4 col-xs-offset-1 col-sm-offset-0 col-xs-10" ng-repeat="group in headings">
-		<h2>{{group.name}}</h2>
-		<p ng-repeat="person in group.people">{{person.name}}: <a href="sms:{{person.phone}}">{{person.phone | tel}}</a></p>
+<div class="people container-fluid page" ng-controller="PeopleCtrl">
+	<h1 class="page-heading-title pink">
+		<div class="container">{{pageTitle}}</div>
+	</h1>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-4 col-xs-offset-1 col-sm-offset-0 col-xs-10" ng-repeat="group in headings">
+				<h2>{{group.name}}</h2>
+				<p ng-repeat="person in group.people">{{person.name}}: <a href="sms:{{person.phone}}">{{person.phone | tel}}</a></p>
+			</div>
+		</div>
 	</div>
 </div>

@@ -3,14 +3,6 @@
  * This file contains styles specific to the people template of the app
  */
 
-div.people {
-	margin-top: $header_size;
-	padding: 30px 0;
-}
+.people {
 
-@media screen and (max-width: 767px) {
-	div.people {
-		margin-top: $header_size/2;
-		padding: 0 0 30px 0;
-	}
 }

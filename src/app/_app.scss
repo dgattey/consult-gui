@@ -4,18 +4,20 @@
  * itself. Should only be used for global styles across templates
  */
 
-$header_size : 50px;
+$nav_size : 3.6em;
+$header_size: $nav_size + 5em;
+$footer_height: 30px;
 
 @import 'views/views';
 
 body {
 	color: $color_text;
-	background-color: $color_accent;
+	background-color: $color_bg;
 }
 
 html {
 	color: $color_text;
-	background-color: $color_accent;
+	background-color: $color_bg;
 }
 
 .text-muted {
@@ -28,6 +30,10 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
 	@extend .title-case;
+}
+
+.page {
+	padding: $nav_size 0;
 }
 
 .title-case {
@@ -58,10 +64,6 @@ h1 {
 	h1, h2, h3, h4, h5, h6, & {
 		color: $color_text_light;
 	}
-}
-
-.pad-body {
-	padding: 50px 0;
 }
 
 @media screen and (max-width: 767px) {

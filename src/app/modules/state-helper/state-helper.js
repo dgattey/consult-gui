@@ -1,76 +1,96 @@
 angular.module('app.modules.stateHelper', [])
-.provider('stateHelp', function($stateProvider) {
-    var genericTPL = 'content';
+.provider('stateHelp', function() {
+  var prefix = '',      // Prefix for all templateUrl's
+    suffix = '.tpl.html', // Suffix for all templateUrl's
+    tplNameRegex = '%tpl%', // Replacement string for a tpl name
+    sharedViews = {},   // The shared views to use across all states
+    stateFunc;        // The function to use in saving state
 
-    // Utility to associate a partial or nonexistent template url with the actual file
-    var processTemplateURL = function(item) {
-      var part = item.partURL ? item.partURL : item.id;
-      return {templateUrl : 'app/views/'+part+'/'+part+'.tpl.html'};
-    };
+  // Constructor for current default views
+  var getSharedViews = function() {
+    var ret = {};
+    angular.forEach(sharedViews, function(v,k){
+      ret[k] = v;
+    });
+    return ret;
+  };
 
-    // Given a parent view, creates @absolute views from children
-    var createStateViews = function(parent) {
-      var subviews = {};
-      angular.forEach(parent.views, function(item){
-        subviews[item.id+'@'+parent.id] = processTemplateURL(item);
+  // Takes a dictionary of names to partial template names to url fragments
+  // and expands it into a full object, adding the prefix and suffix and 
+  // replacing any regex'd string for tpl name with the full name
+  var expandUrls = function(templates, views) {
+    angular.forEach(templates, function(partName, fullName){
+      var pref = prefix.replace(tplNameRegex, partName);
+      var fullUrl = pref + partName + suffix;
+      views[fullName] = {templateUrl: fullUrl};
+    });
+    return views;
+  };
+
+  // Uses the stateFunc to save a state object formatted from expand. stateObj should
+  // be an object in form of {name, url, abstract, views}
+  var save = function(stateObj) {
+    if (!stateFunc) {
+      console.error('State helper missing provider\'s save function');
+      return;
+    }
+    stateFunc(stateObj.name, stateObj);
+  };
+
+  /** 
+   * PUBLIC API
+   * Exposes a subset of the functionality for use by others
+   */
+
+  // A constant 'regex' to use to replace strings at compile time for template urls
+  this.tplNameRegex = tplNameRegex;
+  
+  // Sets prefix on template urls
+  this.setURLPrefix = function(pre) {
+    prefix = pre;
+  };
+
+  // Sets the shared views on all abstract templates
+  this.setSharedViews = function(views) {
+    sharedViews = expandUrls(views, {});
+  };
+
+  // Expands a basic state object to a $stateProvider formatted one.
+  this.expand = function(name, url, templates) {
+    if (!templates) {
+      templates = {};
+    }
+    var abstract = templates.views ? true : false;
+
+    // Saves root ui-view to match overall template
+    templates[''] = name;
+
+    // Saves the concrete template with .detail appended to name
+    if (abstract) {
+      save({
+        name: name + '.detail',
+        url: '',
+        views: expandUrls(templates.views, {})
       });
-      subviews[''] = processTemplateURL(parent);
-      return subviews;
-    };
+      delete templates.views;
+    }
 
-    /* Given a nested object with configuration params, creates the $state router
-       - Takes one level of subviews and creates absolute links for them
-       - Sets id based off id or if default '/'
-       - Sets up $stateProvider.state with all this information
-       */
-    var configState = function(item) {
-      var subviews = createStateViews(item);
-      var url = item['default'] ? '/' : '/'+item.url;
-      var obj = { url: url, views: subviews };
-      $stateProvider.state(item.id, obj);
+    // Saves the abstract template
+    save({
+      name: name,
+      url: url,
+      abstract: abstract,
+      views: expandUrls(templates, getSharedViews())
+    });
+  };
 
-      obj.id = item.id;
-      return obj;
-    };
+  // Sets the state function to use when saving
+  this.setStateFunction = function(func) {
+    stateFunc = func;
+  };
 
-    /* Configures the default navigation for any page with header, footer, content
-       - Assumes the views/home/home.tpl.html holds the page template
-       - Assumes home has ui-views named header, content, and footer
-       - Configures content to work with the correct subviews
-       - ID is the high level id and location of template on disk
-       - URL is the actual path URL
-       - extra is extra views (array or object)
-       - If def is true, configures '/' instead of url as the url
-       */
-    this.configDefaultPage = function(id, url, extra, def) {
-      // Deals with missing url (assumes id mandatory)
-      if (url.id || url[0] && url[0].id) {
-        def = extra;
-        extra = url;
-        url = id;
-      }
-
-      var page = { id: id, partURL: 'content'};
-      page.url = url;
-      if (def === true) page['default'] = true; // default?
-
-      // Content template
-      var content = { id: genericTPL };
-      content.partURL = id; // Custom URL
-
-      // Creates views (with extra data if need be)
-      var views = [content, {id : 'header'}, {id : 'footer'}];
-      if (extra) {
-        if (extra.concat) views = views.concat(extra);
-        else views.push(extra);
-      }
-      page.views = views;
-
-      return configState(page);
-    };
-
-    // Nothin
-    this.$get = function() {
-      return angular.noop;
-    };
+  // Just returns the whole provider
+  this.$get = function(){
+    return this;
+  };
 });

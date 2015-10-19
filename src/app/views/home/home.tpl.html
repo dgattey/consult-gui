@@ -1,9 +1,7 @@
-<div class="home-page container" ng-controller="FeedCtrl">
-
-	<h3 class="col-xs-12 welcome">Welcome to the consult portal, {{cslogin}}</h3>
-
+<div class="home-page page container" ng-controller="FeedCtrl">
+	<h3 class="welcome">Good morning Dylan!</h3>
 	<!-- For every option, show a div with image and such -->
-	<div class="all-items">
+	<div class="all-items row">
 		<div ng-repeat="item in links" class="col-xs-12 home-item">
 			<a ui-sref="{{item.title.toLowerCase()}}" class="page-heading-title card" ng-class="{'green':item.color=='green', 'pink':item.color=='pink'}">
 				<h1>{{item.title}}</h1>

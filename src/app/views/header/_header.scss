@@ -2,23 +2,33 @@
  * HEADER
  * This file contains styles specific to the header template of the app
  */
-
-nav .header.navbar-inverse {
-	height: $header_size;
+.status {
+	border-bottom: 1px solid $color_gray;
+	background-color: $color_bg_dark;
 	color: $color_text_light;
-	background-color: $color_accent;
+	max-height: 5em; // More or less...
+	p {
+		&.shifts {
+			float: right;
+		}
+		&.login {
+			float: left;
+		}
+		line-height: 2em;
+		margin-bottom: 0;
+		font-size: 0.85em;
+	}
+}
+
+nav .header.navbar-default {
+	height: $nav_size;
+	color: $color_text_light;
+	background-color: $color_bg;
 	&, .navbar-collapse, .navbar-form {
-		border-color: lighten($color_accent, 5%);
+		border-color: $color_gray;
 	}
 	.navbar-nav > li.active > a {
-		background-color: darken($color_accent, 10%);
-	}
-	.navbar-nav > li > a, &.navbar > .container .navbar-brand {
-		color: $color_text_light;
-		font-weight: 400;
-		&:hover {
-			color: $color_hover;
-		}
+		background-color: darken($color_bg_light, 15%);
 	}
 
 	&.navbar > .container .navbar-brand {
@@ -28,22 +38,22 @@ nav .header.navbar-inverse {
 
 	ul.search-results {
 		display: block;
-		background: $color_accent;
+		background: $color_bg_light;
 		padding: 16px;
 		border-radius: 0px 0px 5px 5px;
-		border: 1px solid lighten($color_accent, 5%);
+		border: 1px solid $color_gray;
 		border-top: none;
 		li {
 			list-style-type: none;
 			&, a {
-				color: $color_text_light;
+				color: $color_text_gray;
 			}
 			a {
 				display: block;
 				padding: 8px;
 				&:hover {
-					color: $color_text_light;
-					background-color: lighten($color_accent, 5%);
+					color: $color_text_gray;
+					background-color: darken($color_bg, 5%);
 					text-decoration: none;
 				}
 			}
@@ -54,7 +64,7 @@ nav .header.navbar-inverse {
 @media screen and (max-width: 768px) {
 	nav .header.navbar-inverse {
 		.navbar-collapse {
-			background-color: $color_accent;
+			background-color: $color_bg_light;
 		}
 		ul.search-results {
 			padding: 16px 0 0 0;

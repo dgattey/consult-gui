@@ -1,4 +1,4 @@
-<div class="navbar navbar-inverse navbar-fixed-top header" >
+<div class="navbar navbar-default navbar-fixed-top header" >
   <div class="container header" ng-controller="HeaderCtrl">
     
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -33,4 +33,17 @@
       </form>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container -->
+
+  <!-- Status -->
+  <div class="status">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <p class="login">Logged in as {{cslogin}}</p>
+          <p class="shifts">X is currently on shift and X is up next. Your next shift is in X hours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 </div>

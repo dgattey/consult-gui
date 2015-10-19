@@ -10,14 +10,20 @@ angular.module('App', [
   'app.models',
   'app.views'
   ])
-.config(function($urlRouterProvider, $locationProvider, stateHelpProvider){
-    var shpc = stateHelpProvider.configDefaultPage;
+.config(function($urlRouterProvider, $locationProvider, $stateProvider, stateHelpProvider){
+    // Set up defaults for state helper
+    stateHelpProvider.setStateFunction($stateProvider.state);
+    stateHelpProvider.setURLPrefix('app/views/'+stateHelpProvider.tplNameRegex+'/');
+    stateHelpProvider.setSharedViews({
+        header: 'header',
+        footer: 'footer'
+    });
 
-    // Set up ui-router states using the stateHelpProvider library
-    shpc('home', '');
-    shpc('schedule', 'schedule');
-    shpc('sub', 'sub');
-    shpc('people', 'contact');
+    // Expand states and save them with the $stateProvider
+    stateHelpProvider.expand('home', '/');
+    stateHelpProvider.expand('schedule', '/schedule/:weekOffset');
+    stateHelpProvider.expand('sub', '/sub');
+    stateHelpProvider.expand('people', '/contact');
 
     // Configure other router providers
     $urlRouterProvider.otherwise('/');

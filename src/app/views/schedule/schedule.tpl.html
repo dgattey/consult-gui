@@ -1,16 +1,18 @@
-<div class="schedule container" ng-controller="ScheduleCtrl">
+<div class="schedule container-fluid page" ng-controller="ScheduleCtrl">
 	<h1 class="page-heading-title col-xs-12">
-		<div class="row">
-			<div class="col-lg-10 col-sm-9">
-				{{pageTitle}} 
-				<span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span>
-			</div>
-			<div class="col-lg-2 col-sm-3 week-changers">
-				<span class="change-week">
-					<button ng-click="weekOffset = weekOffset - 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week < 1">&lt;</button>
-					<button ng-click="weekOffset = weekOffset + 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week >= maxWeeks">&gt;</button>
-				</span>
-				<span class="change-week today" ng-click="weekOffset = 0">Today</span>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-10 col-sm-9">
+					{{pageTitle}} 
+					<span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span>
+				</div>
+				<div class="col-lg-2 col-sm-3 week-changers">
+					<span class="change-week">
+						<button ng-click="weekOffset = weekOffset - 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week < 1">&lt;</button>
+						<button ng-click="weekOffset = weekOffset + 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week >= maxWeeks">&gt;</button>
+					</span>
+					<span class="change-week today" ng-click="weekOffset = 0">Today</span>
+				</div>
 			</div>
 		</div>
 	</h1>
@@ -20,51 +22,48 @@
 			<p>Looks like there's no schedule for the current week. Make sure you're still in the semester.</p>
 		</div>
 	</div>
-	<div class="col-xs-12 calendar" ng-class="{highlighted: shouldHighlight}">
-		<div class="row">
-			<!-- Legend on left -->
-			<div class="col-sm-1 hidden-xs legend" ng-show="days">
-				<div class="legend-block" 
-					ng-repeat="hour in legend" >
-					<h5>{{hour.start}}</h5>
-				</div>
+	<div class="calendar" ng-class="{highlighted: shouldHighlight}">
+		<!-- Legend on left -->
+		<div class="col-sm-1 hidden-xs legend" ng-show="days">
+			<div class="legend-block" 
+				ng-repeat="hour in legend" >
+				<h5>{{hour.start}}</h5>
 			</div>
+		</div>
 
-			<!-- Days -->
-			<div class="col-sm-11 col-xs-12 days">
-				<!-- Shows line at current time -->
-				<div class="hidden-xs" id="currTime"
-					ng-show="days" 
-					ng-style="blockStyle()">
-					<hr>
-				</div>
-				
-				<!-- Each of the days -->
-				<div ng-repeat="day in days" 
-					ng-class="{day: true, today: current.day==day.index && weekOffset == 0}" 
-					id="{{day.title}}">
-					<h4>{{day.title}}</h4>
-					<div class="time-blocks">
+		<!-- Days -->
+		<div class="col-sm-11 col-xs-12 days">
+			<!-- Shows line at current time -->
+			<div class="hidden-xs" id="currTime"
+				ng-show="days" 
+				ng-style="blockStyle()">
+				<hr>
+			</div>
+			
+			<!-- Each of the days -->
+			<div ng-repeat="day in days" 
+				ng-class="{day: true, today: current.day==day.index && weekOffset == 0}" 
+				id="{{day.title}}">
+				<h4>{{day.title}}</h4>
+				<div class="time-blocks">
 
-						<!-- Each of the blocks for the given day -->
-						<div class="time-block" 
-							ng-repeat="(slot,time) in day.slots" 
-							ng-style="blockStyle(time)"
-							ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected, current: showsCurrent(day, time), past: showsPast(day, time)}"
-							ng-hide="time.user == 'CLOSED'"
-							ng-click="highlight(time.user)"
-							tooltip="{{time.start}} to {{time.end}}"
-							tooltip-trigger 
-							tooltip-animation="true" 
-							tooltip-placement="top">
-							<h5>{{time.user == 'FREE' ? 'Needs sub!' : time.user}}
-								<span class="visible-xs hidden-sm hidden-md hidden-lg time"> {{time.start}} - {{time.end}}</span>
-							</h5>
-						</div>
+					<!-- Each of the blocks for the given day -->
+					<div class="time-block" 
+						ng-repeat="(slot,time) in day.slots" 
+						ng-style="blockStyle(time)"
+						ng-class="{me: time.user==cslogin, subbed: time.free, selected: time.selected, current: showsCurrent(day, time), past: showsPast(day, time)}"
+						ng-hide="time.user == 'CLOSED'"
+						ng-click="highlight(time.user)"
+						tooltip="{{time.start}} to {{time.end}}"
+						tooltip-trigger 
+						tooltip-animation="true" 
+						tooltip-placement="top">
+						<h5>{{time.user == 'FREE' ? 'Needs sub!' : time.user}}
+							<span class="visible-xs hidden-sm hidden-md hidden-lg time"> {{time.start}} - {{time.end}}</span>
+						</h5>
 					</div>
 				</div>
 			</div>
 		</div>
-
 	</div>
 </div>

@@ -10,9 +10,11 @@
   <!-- endinject -->
 </head>
 
-<body>
+<body ng-controller="AppCtrl">
   <!-- Template view for app screens -->
-  <div ui-view></div>
+  <nav ui-view="header"></nav>    
+  <div ui-view id="content"></div>
+  <footer ui-view="footer" id="footer"></footer>
 
   <!-- inject:js -->
   <!-- endinject -->

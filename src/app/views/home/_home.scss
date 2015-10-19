@@ -4,16 +4,14 @@
  */
 
 div.home-page {
- 	margin-top: $header_size;
- 	padding: 30px 0;
 
+	.welcome {
+		margin-top: 40px;
+		margin-bottom: 20px;
+	}
  	.home-item {
- 		&:hover {
- 			// opacity: 0.85;
- 		}
  		a {
 			text-decoration: none;
- 			padding: 25px 60px;
 			&:hover {
 				&.green {
 	 				@include card(hsl(179, 100%, 50%));
@@ -31,15 +29,4 @@ div.home-page {
  			font-size: 1.4em;
  		}
  	}
-
- 	.welcome {
- 		margin-bottom: 30px;
- 	}
-}
-
-@media screen and (max-width: 767px) {
-	div.home-page {
-		margin-top: $header_size;
-		padding: 0 0 30px 0;
-	}
 }

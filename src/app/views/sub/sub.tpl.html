@@ -1,49 +1,59 @@
-<div class="sub container" ng-controller="SubCtrl">
-	<div class="row">
-		<div class="col-xs-12 col-lg-7">
-			<!-- Free shifts title -->
-			<h1 class="page-heading-title col-xs-12">Free Shifts</h1>
-			<div class="row">
-				<p ng-show="freeCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Help your fellow consultants out! The following shifts have no owner and could use you if you're free.</p>
-				<p ng-show="freeCount(slots) == 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">There aren't any shifts to take right now. Looks like we're all set! Check back later if you want to pick up some extra shifts.</p>
+<div class="sub container-fluid page" ng-controller="SubCtrl">
+	<h1 class="page-heading-title green">
+		<div class="container">
+			<div class="col-lg-7">
+				Free Shifts
 			</div>
-
-			<!-- Other people's free slots -->
-			<div ng-repeat="week in slots" class="row">
-				<div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0" ng-hide="week.free == 0">
-					<h4 class="week-of-title">Week of {{week.date | date : 'shortDate'}}</h4>
+			<div class="col-lg-5">
+				My Shifts
+			</div>
+		</div>
+	</h1>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 col-lg-7">
+				<!-- Free shifts title -->
+				<div class="row">
+					<p ng-show="freeCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Help your fellow consultants out! The following shifts have no owner and could use you if you're free.</p>
+					<p ng-show="freeCount(slots) == 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">There aren't any shifts to take right now. Looks like we're all set! Check back later if you want to pick up some extra shifts.</p>
 				</div>
-				<div ng-repeat="(weekday, day) in week.days">
-					<div ng-repeat="slot in day.slots" ng-show="slot.free" class="col-md-4 col-sm-6 col-xs-10 col-xs-offset-1 col-sm-offset-0">
-						<!-- Each free slot as a card -->
-						<div class="slot">
-							<h4>{{calculateDate(week.date, weekday) | date : 'EEE MMM d, yyyy'}}</h4>
-							<h4 class="time">{{slot.start}} - {{slot.end}}</h4>
+
+				<!-- Other people's free slots -->
+				<div ng-repeat="week in slots" class="row">
+					<div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0" ng-hide="week.free == 0">
+						<h4 class="week-of-title">Week of {{week.date | date : 'shortDate'}}</h4>
+					</div>
+					<div ng-repeat="(weekday, day) in week.days">
+						<div ng-repeat="slot in day.slots" ng-show="slot.free" class="col-md-4 col-sm-6 col-xs-10 col-xs-offset-1 col-sm-offset-0">
+							<!-- Each free slot as a card -->
+							<div class="slot">
+								<h4>{{calculateDate(week.date, weekday) | date : 'EEE MMM d, yyyy'}}</h4>
+								<h4 class="time">{{slot.start}} - {{slot.end}}</h4>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<div class="col-xs-12 col-lg-5">
-			<!-- Your shifts -->
-			<h1 class="page-heading-title green col-xs-12">My Shifts</h1>
-			<div class="row">
-				<p ng-show="meCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Need to sub out your own slots? This is everything you're signed up for today and beyond.</p>
-				<p ng-show="meCount(slots) == 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Looks like you have no slots beyond today, so there's nothing you can sub out!</p>
-			</div>
-
-			<!-- Your slots -->
-			<div ng-repeat="week in slots" class="row">
-				<div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0" ng-hide="week.me == 0">
-					<h4 class="week-of-title">Week of {{week.date | date : 'shortDate'}}</h4>
+			<div class="col-xs-12 col-lg-5">
+				<!-- Your shifts -->
+				<div class="row">
+					<p ng-show="meCount(slots) > 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Need to sub out your own slots? This is everything you're signed up for today and beyond.</p>
+					<p ng-show="meCount(slots) == 0" class="welcome col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">Looks like you have no slots beyond today, so there's nothing you can sub out!</p>
 				</div>
-				<div ng-repeat="(weekday, day) in week.days">
-					<div ng-repeat="slot in day.slots" ng-show="slot.user == cslogin" class="col-lg-6 col-md-4 col-sm-6 col-xs-10 col-xs-offset-1 col-sm-offset-0">
-						<!-- Each free slot as a card -->
-						<div class="slot mine">
-							<h4>{{calculateDate(week.date, weekday) | date : 'EEE MMM d, yyyy'}}</h4>
-							<h4 class="time">{{slot.start}} - {{slot.end}}</h4>
+
+				<!-- Your slots -->
+				<div ng-repeat="week in slots" class="row">
+					<div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0" ng-hide="week.me == 0">
+						<h4 class="week-of-title">Week of {{week.date | date : 'shortDate'}}</h4>
+					</div>
+					<div ng-repeat="(weekday, day) in week.days">
+						<div ng-repeat="slot in day.slots" ng-show="slot.user == cslogin" class="col-lg-6 col-md-4 col-sm-6 col-xs-10 col-xs-offset-1 col-sm-offset-0">
+							<!-- Each free slot as a card -->
+							<div class="slot mine">
+								<h4>{{calculateDate(week.date, weekday) | date : 'EEE MMM d, yyyy'}}</h4>
+								<h4 class="time">{{slot.start}} - {{slot.end}}</h4>
+							</div>
 						</div>
 					</div>
 				</div>
