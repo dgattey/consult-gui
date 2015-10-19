@@ -138,23 +138,6 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
   }
 
   /*
-   * Loops through the slots and deletes anything that isn't free. Pretty simple
-   * but it assumes all slots already exist.
-   */
-  function filterForFree(data) {
-    return $q(function(resolve, reject) {
-      if (!data.slots) {
-        reject('No slot data');
-      }
-      for (var slot in data.slots) {
-        if (data.slots[slot] == 'FREE') continue;
-        else delete data.slots[slot];
-      }
-      resolve(data);
-    });
-  }
-
-  /*
    * Gets the next slot from the current slot text. Slots are represented
    * represented as letter + number, where the letter is an hour of the day
    * and day is a day of the week (1 through 7).
@@ -210,19 +193,38 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
     .then(current ? noopPromise : setCurrent);
   }
 
+  /*
+   * Given a data array, filters out all slots that don't have a user
+   * equal to the passed in value
+   */
+   function filter(data, user) {
+    if (!user) user = 'FREE'; // default
+    return $q(function(resolve, reject) {
+      if (!data.slots) {
+        reject('No slot data');
+      }
+      for (var slot in data.slots) {
+        if (data.slots[slot] == user) continue;
+        else delete data.slots[slot];
+      }
+      resolve(data);
+    });
+  }
+
   /* PUBLIC 
    * Methods exposed to any users of this module
    */
 
   this.initializeShifts = initializeShifts;
+  this.filter = filter;
 
   /*
    * Loads in metadata, the translation of id -> shift times, the permanent
    * schedule, the current week's schedule based on weekOffset, and returns
    * the data via promise
    */
-  this.loadWeek = function(weekOffset) {
-    return initializeShifts()
+  this.loadWeek = function(weekOffset, meta, shifts, current) {
+    return initializeShifts(meta, shifts, current)
     .then(readPermanentSchedule)
     .then(function(data) {
       return setCurrent(data, weekOffset);
@@ -241,7 +243,7 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
       return setCurrent(data, weekOffset);
     })
     .then(readWeekSchedule)
-    .then(filterForFree);
+    .then(filter);
   };
 
   /*

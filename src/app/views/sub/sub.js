@@ -18,37 +18,51 @@ angular.module('app.views.sub', [])
 		return date;
 	}
 
-	// weekStart is date, dayOffset is 1-7 for day after
-	$scope.calculateDate = function(weekStart, dayOffset) {
+	/*
+	 * Helper to calculate a date given a date representing the start of the week
+	 * and an offset for the number of days after it that we should be showing
+	 */
+	function calculateDate(weekStart, dayOffset) {
 		var date = new Date(weekStart);
 		var day = date.getDate() + parseInt(dayOffset, 10);
 		date.setDate(day);
 		return date;
-	};
+	}
 
+	/*
+	 * Given one week's worth of data, saves it to the slots
+	 * array. Means that each time we load a week, the slots array gets
+	 * changed. Oh well.
+	 */
 	function saveWeek(data) {
-		if (Object.keys(data.slots).length === 0) return;
-
-		// Save current week to the free slots array
 		var days = scheduleLoader.slotsToDays(data);
 		monday = calculateMonday(data.meta.startDate, data.current.week);
+		if (!$scope.freeSlots) $scope.freeSlots = {};
 		$scope.freeSlots[data.current.week] = {date: monday, days:days};
 	}
 
+	/*
+	 * Function to loop through all weeks from today and use promises to 
+	 * asyncronously load and save the given week. The loader uses the
+	 * current date automatically, so we just need to iterate to total
+	 * weeks - current week offset.
+	 */
 	function loadAllWeeks(data) {
 		var minWeek = 0;
 		var maxWeek = data.meta.weeks - data.current.week;
-
-		// Initializing the frontend data
-		$scope.freeSlots = {};
 		for (i = minWeek; i <= maxWeek; i++) {
 			scheduleLoader.loadFree(i, data.meta, data.shifts)
 			.then(saveWeek);
 		}
 	}
 
-	// Needs to initialize all shifts for the metadata, then loads each
-	// week's free slots
+	/*
+	 * Creates metadata and shift times once, then repeatedly loads in
+	 * each week's worth of data. There's only one data source, but it's
+	 * filtered on the frontend to only show free slots or only show own
+	 * slots.
+	 */
+	$scope.calculateDate = calculateDate;
 	scheduleLoader.initializeShifts()
 	.then(loadAllWeeks);
 
