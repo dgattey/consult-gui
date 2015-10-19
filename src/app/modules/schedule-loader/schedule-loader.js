@@ -15,7 +15,7 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * f5 FREE awstlaur
    * j2 Tue 18:00-19:00
    */
-  function saveSlotData(raw, dest) {
+  function saveRawSlotData(raw, dest) {
     var lines = raw.split('\n');
     var i;
     for (i = 0; i< lines.length; i++) {
@@ -29,6 +29,33 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
       if (login.indexOf('FREE') > -1) dest[slot] = 'FREE';
       else dest[slot] = login; // overwrites prior - files organized by recency
     }
+  }
+
+  /*
+   * Given a slot, parses shift time and date and saves the user, start/end,
+   * and free data to the days array. See saveRawSlotData for details about
+   * the id.
+   */
+  function saveSlotToDays(id, days, data) {
+    // Parse text data from shifts
+    var text = data.shifts[id];
+    var dayName = text.substring(0, text.indexOf(' '));
+    var startTime = text.substring(StringExtensions.nthOccurrence(text, ' ', 1)+1, text.indexOf('-'));
+    var endTime = text.substring(text.indexOf('-')+1);
+    
+    // Update slots and title
+    i = id.substring(1, 2) - 1; //since it's 1 indexed
+    if (!days[i]) {
+      days[i] = {title: '', slots: {}, index: i+1};
+    }
+    days[i].slots[id] = {
+      start: startTime,
+      end: endTime,
+      user: data.slots[id],
+      free: data.slots[id] == 'FREE',
+      selected: false
+    };
+    days[i].title = dayName;
   }
 
   /*
@@ -50,14 +77,14 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * data: object representing data passed through all functions
    * dest: where to save the slot data to
    * file: location in filesystem to load
-   * func: the function to use to save the data (if not specified, uses saveSlotData)
+   * func: the function to use to save the data (if not specified, uses saveRawSlotData)
    */
   function saveFromFile(data, dest, file, func) {
     var loc = file ? schedDir + file : schedDir;
     return $q(function(resolve, reject) {
       $http.get(loc).success(function(raw) {
         if (!func) {
-          func = saveSlotData;
+          func = saveRawSlotData;
         }
         func(raw, dest);
         resolve(data);
@@ -83,9 +110,9 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
     return saveFromFile(data, data.slots);
   }
 
-  // Loads in the current week's schedule to data.slots
-  function readWeekSchedule(data) {
-    return saveFromFile(data, data.slots, '.week.' + data.current.week);
+  // Loads in the current (or specifed) week's schedule to data.slots
+  function readWeekSchedule(data, weekNum) {
+    return saveFromFile(data, data.slots, '.week.' + (weekNum ? weekNum : data.current.week));
   }
 
   /*
@@ -115,6 +142,9 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    */
   function filterForFree(data) {
     return $q(function(resolve, reject) {
+      if (!data.slots) {
+        reject('No slot data');
+      }
       for (var slot in data.slots) {
         if (data.slots[slot] == 'FREE') continue;
         else delete data.slots[slot];
@@ -141,7 +171,7 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * blocks.
    */
   function coalesceSlots(days) {
-    for (var i = 0; i < days.length; i++) {
+    for (var i in days) {
       var d = days[i];
 
       // For each slot, if it is the same user as the next one and
@@ -160,9 +190,21 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
     }
   }
 
+  /*
+   * Sets up the data object, and reads in metadata and shifttimes to the
+   * array. Sets up the object for future calls to load in files
+   */
+  function initializeShifts() {
+    var data = {meta: {}, slots: {}, shifts: {}, current: {}};
+    return readMetadata(data)
+    .then(translateShifts);
+  }
+
   /* PUBLIC 
    * Methods exposed to any users of this module
    */
+
+  this.initializeShifts = initializeShifts;
 
   /*
    * Loads in metadata, the translation of id -> shift times, the permanent
@@ -170,9 +212,7 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * the data via promise
    */
   this.loadWeek = function(weekOffset) {
-    var data = {meta: {}, slots: {}, shifts: {}, current: {}};
-    return readMetadata(data)
-    .then(translateShifts)
+    return initializeShifts()
     .then(readPermanentSchedule)
     .then(function(data) {
       return setCurrent(data, weekOffset);
@@ -181,14 +221,12 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
   };
 
   /*
-   * Loads in metadata, the translation of id -> shift times, the current week's 
-   * schedule based on weekOffset (but not the perm schedule), and returns
-   * the data via promise
+   * Loads the current week's schedule based on offset (but not the 
+   * perm schedule), deletes all non-free spots, and returns the data 
+   * via promise. 
    */
   this.loadFree = function(weekOffset) {
-    var data = {meta: {}, slots: {}, shifts: {}, current: {}};
-    return readMetadata(data)
-    .then(translateShifts)
+    return initializeShifts()
     .then(function(data) {
       return setCurrent(data, weekOffset);
     })
@@ -204,39 +242,19 @@ angular.module('app.modules.scheduleLoader', ['stringExtensions'])
    * have long blocks rather than hour long blocks.
    */
   this.slotsToDays = function(data) {
-    // Initializing days array
-    days = [];
-    for (var i = 6; i >= 0; i--) {
-      days[i] = {title: '', slots: {}, index: i+1}; // title will be corrected later
-    }
+    // Initializing days object
+    days = {};
 
-    // Associates shift times with days
-    for (var slot in data.shifts) {
-      // Only include r and s slots if we're in reading period
-      if (slot.indexOf('r') > -1 || slot.indexOf('s') > -1) {
-        if (data.current.week < data.meta.weeksToReading) continue;
-      }
-
-      // Parse text data from shifts
-      var text = data.shifts[slot];
-      var dayName = text.substring(0, text.indexOf(' '));
-      var startTime = text.substring(StringExtensions.nthOccurrence(text, ' ', 1)+1, text.indexOf('-'));
-      var endTime = text.substring(text.indexOf('-')+1);
-      
-      // Update slots and title
-      i = slot.substring(1, 2) - 1; //since it's 1 indexed
-      days[i].slots[slot] = {
-        start: startTime,
-        end: endTime,
-        user: data.slots[slot],
-        free: data.slots[slot] == 'FREE',
-        selected: false
-      };
-      days[i].title = dayName;
+    for (var id in data.shifts) {
+      // r & s are reading period only, and lack of data slot means it shouldn't be saved
+      if ((id.indexOf('r') > -1 || id.indexOf('s') > -1) && data.current.week < data.meta.weeksToReading) continue;
+      if (!data.slots[id]) continue;
+      saveSlotToDays(id, days, data);
     }
 
     // Combine adjacent slots that are the same user and return days
     coalesceSlots(days);
+    if (Object.keys(days).length === 0) return undefined;
     return days;
   };
 });

@@ -125,7 +125,7 @@ angular.module('app.views.schedule', ['ui.bootstrap.tooltip', 'stringExtensions'
 			slot.selected = slot.user == user && oldUser != slot.user;
 		};
 		// Go through all blocks and update selected status
-		for (var i=0; i<$scope.days.length; i++) {
+		for (var i in $scope.days) {
 			angular.forEach($scope.days[i].slots, updateSlot);
 		}
 		$scope.shouldHighlight = oldUser != user; // only when old selected was different
