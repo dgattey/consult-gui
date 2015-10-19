@@ -14,6 +14,8 @@ $dg_white			: hsl($dg_base_hue, 33%, 97%);
 
 $color_bg_light 	: #fff;
 $color_bg 			: $dg_white;
+$color_bg_gray		: mix($dg_gray_light, $dg_eggshell, 30%);
+$color_bg_gray_light: mix($dg_eggshell, $dg_white, 50%);
 $color_bg_dark		: $dg_black;
 $color_gray			: $dg_gray_light;
 $color_accent		: $dg_blue;

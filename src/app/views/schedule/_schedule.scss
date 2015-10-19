@@ -13,47 +13,34 @@ div.schedule {
 	.page-heading-title {
 		margin-bottom: 0;
 	}
-	.change-week {
-		display: inline-block;
-		padding-left: 20px;
-		cursor: pointer;
-		font-size: 1.4em;
-		font-weight: 900;
-		text-align: right;
-		float: right;
-		.btn {
-			&:focus {
-				outline:0;
-			}
-			padding: 0;
-			font-weight: 900;
-			text-align: right;
-			font-size: 1.0em;
-			color: #eee;
-			text-decoration: none;
-			&:hover {
-				color: #fff;
-				text-decoration: none;
-			}
-		}
-		&.today {
-			display: block;
+	.week-of-block {
+		border-bottom: 1px solid $color_bg_gray;
+		box-shadow: 0 2px 4px $color_bg_gray_light;
+		background-color: $color_bg_gray_light;
+		h3 {
 			font-weight: 600;
-			font-size: 0.75em;
-			letter-spacing: 0;
+			color: $color_text_gray;
 		}
 	}
-
-	.week-of {
-		display: block;
-		padding-top: 10px;
-		font-size: 0.6em;
-		color: #ccc;
-		color: rgba(255,255,255,0.6);
+	.controls {
+		float:right;
+		margin: 10px 0;
+		.btn {
+			font-weight: 900;
+			text-transform: uppercase;
+			font-size: 1.5em;
+			&.offset {
+				font-size: 2em;
+			}
+		}
 	}
 
 	.calendar {
+		padding-top: 20px;
 		.day {
+			h4 {
+				color: $color_text;
+			}
 			float:left;
 			width: 14.2857143%;
 		}
@@ -74,7 +61,7 @@ div.schedule {
 		}
 		.today {
 			h4 {
-				color: $color_accent_green;
+				color: $color_bg_green;
 				font-weight: 700;
 			}
 		}
@@ -85,16 +72,17 @@ div.schedule {
 			position: relative;
 		}
 		.legend {
-			background: $color_hover;
-			padding-top: 40px;
+			padding-top: 37px;
 		}
 		.legend-block {
-			border-top: 2px solid $color_accent;
-			margin-bottom: 27px;
+			border-top: 1px solid $color_text_mute;
+			margin-bottom: 25px;
 			h5 {
+				color: $color_text;
 				font-size: 0.9em;
 				letter-spacing: 0.5px;
-				margin-top:5px;
+				margin-top:8px;
+				text-align: right;
 			}
 		}
 		&.highlighted {
@@ -159,23 +147,6 @@ div.schedule {
 					padding-bottom: 50px;
 					margin-top: 0!important;
 				}
-			}
-		}
-		.week-changers {
-			padding-top: 30px;
-		}
-
-		.change-week {
-			display: block;
-			text-align: left;
-			width: 50%;
-			float: left;
-			span {
-				padding-right: 10px;
-			}
-			&.today {
-				padding-top: 10px;
-				font-size: 0.9em;
 			}
 		}
 	}

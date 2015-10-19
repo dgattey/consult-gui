@@ -1,28 +1,35 @@
 <div class="schedule container-fluid page" ng-controller="ScheduleCtrl">
 	<h1 class="page-heading-title col-xs-12">
 		<div class="container">
-			<div class="row">
-				<div class="col-lg-10 col-sm-9">
-					{{pageTitle}} 
-					<span class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</span>
-				</div>
-				<div class="col-lg-2 col-sm-3 week-changers">
-					<span class="change-week">
-						<button ng-click="weekOffset = weekOffset - 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week < 1">&lt;</button>
-						<button ng-click="weekOffset = weekOffset + 1" type="button" class="btn btn-lg btn-link" ng-disabled="current.week >= maxWeeks">&gt;</button>
-					</span>
-					<span class="change-week today" ng-click="weekOffset = 0">Today</span>
-				</div>
-			</div>
+			{{pageTitle}}
 		</div>
 	</h1>
+
+	<!-- Week of -->
+	<div class="week-of-block col-xs-12">
+		<div class="col-sm-1 hidden-xs"></div>
+		<div class="col-sm-7 col-xs-8">
+			<h3 class="week-of">Week of {{weekStart | date : 'shortDate'}} - {{weekEnd | date : 'shortDate'}}</h3>
+		</div>
+		<div class="col-xs-4">
+			<div class="controls btn-group btn-group-lg" role="group" aria-label="control buttons">
+				  <button type="button" class="btn btn-success" ng-click="weekOffset = weekOffset - 1" ng-disabled="current.week < 1">&lt;</button>
+				  <button type="button" class="btn btn-success" ng-click="weekOffset = 0">Today</button>
+				  <button type="button" class="btn btn-success" ng-click="weekOffset = weekOffset + 1" ng-disabled="current.week >= maxWeeks">&gt;</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- No schedule -->
 	<div class="no-schedule" ng-hide="days">
 		<div class="container">
 			<h3>No schedule</h3>
 			<p>Looks like there's no schedule for the current week. Make sure you're still in the semester.</p>
 		</div>
 	</div>
-	<div class="calendar" ng-class="{highlighted: shouldHighlight}">
+
+	<!-- Calendar itself -->
+	<div class="calendar col-xs-12" ng-class="{highlighted: shouldHighlight}">
 		<!-- Legend on left -->
 		<div class="col-sm-1 hidden-xs legend" ng-show="days">
 			<div class="legend-block" 
